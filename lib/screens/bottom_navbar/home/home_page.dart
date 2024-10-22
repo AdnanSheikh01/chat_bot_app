@@ -1,3 +1,4 @@
+import 'package:chat_bot_app/screens/bottom_navbar/dummy_chat.dart';
 import 'package:chat_bot_app/screens/bottom_navbar/home/audio.dart';
 import 'package:chat_bot_app/screens/bottom_navbar/home/image_gen.dart';
 import 'package:chat_bot_app/screens/bottom_navbar/home/language_trans.dart';
@@ -17,9 +18,10 @@ class HomePage extends StatelessWidget {
         Icon(Icons.edit),
         Colors.blue,
         "Content",
-        NewChatPage(
-          appTitle: "Content",
-        ),
+        // NewChatPage(
+        //   appTitle: "Content",
+        // ),
+        ChatScreenDum()
       ],
       [
         Icon(Icons.photo),
@@ -55,7 +57,7 @@ class HomePage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: MediaQuery.of(context).size.height * .1),
+              SizedBox(height: MediaQuery.of(context).size.height * .01),
               Center(
                 child: GestureDetector(
                   onTap: () => Scaffold.of(context).openDrawer(),

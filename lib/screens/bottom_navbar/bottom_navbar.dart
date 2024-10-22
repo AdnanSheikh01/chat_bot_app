@@ -51,6 +51,9 @@ class _BottomNavbarScreenState extends State<BottomNavbarScreen> {
                 color: Color(0xFFF2F5FA),
               ),
         child: Scaffold(
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+          ),
           drawer: Drawer(
             backgroundColor:
                 isDarkTheme ? Colors.black : Colors.white.withOpacity(.9),
