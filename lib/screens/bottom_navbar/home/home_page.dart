@@ -3,7 +3,7 @@ import 'package:chat_bot_app/screens/bottom_navbar/home/audio.dart';
 import 'package:chat_bot_app/screens/bottom_navbar/home/image_gen.dart';
 import 'package:chat_bot_app/screens/bottom_navbar/home/language_trans.dart';
 import 'package:chat_bot_app/screens/bottom_navbar/home/lens.dart';
-import 'package:chat_bot_app/screens/bottom_navbar/chat/new_chat.dart';
+
 import 'package:flutter/material.dart';
 
 class HomePage extends StatelessWidget {

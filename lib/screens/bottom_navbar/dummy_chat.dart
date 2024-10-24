@@ -1,7 +1,14 @@
+import 'dart:developer';
+
 import 'package:chat_bot_app/models/message.dart';
 import 'package:chat_bot_app/providers/chat_provider.dart';
+import 'package:chat_bot_app/screens/bottom_navbar/assistant_message.dart';
+import 'package:chat_bot_app/screens/bottom_navbar/my_message.dart';
 import 'package:chat_bot_app/widgets/auto_type_text.dart';
+import 'package:chat_bot_app/widgets/preview_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 class ChatScreenDum extends StatefulWidget {
@@ -13,73 +20,202 @@ class ChatScreenDum extends StatefulWidget {
 
 class _ChatScreenDumState extends State<ChatScreenDum> {
   String _message = "";
+  final _mesController = TextEditingController();
+  final _scrollController = ScrollController();
+  final ImagePicker _imagePicker = ImagePicker();
+
+  Future<void> sendMessage(
+      {required String message,
+      required ChatProvider chatProvider,
+      required bool isTextOnly}) async {
+    try {
+      chatProvider.getMessage(message: message, isTextOnly: isTextOnly);
+    } catch (e) {
+      log("error: $e");
+    } finally {
+      _mesController.clear();
+      chatProvider.setImageFileList(imageList: []);
+      _message = "";
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrolltoBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients &&
+          _scrollController.position.maxScrollExtent > 0.0) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  void pickImage(ChatProvider chatprovider) async {
+    try {
+      final pickedImages = await _imagePicker.pickMultiImage(
+          maxHeight: 800, maxWidth: 800, imageQuality: 95);
+      chatprovider.setImageFileList(imageList: pickedImages);
+
+      setState(() {});
+    } catch (e) {
+      log("Error: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final chatprovider = Provider.of<ChatProvider>(context);
     bool isDarkTheme = Theme.of(context).brightness == Brightness.dark;
-
+    bool hasImages = chatprovider.imageFileList != null &&
+        chatprovider.imageFileList!.isNotEmpty;
     return Consumer<ChatProvider>(
       builder: (context, chatprovider, state) {
-        return Scaffold(
-          body: SafeArea(
-            child: Column(
-              children: [
-                Expanded(
-                  child: chatprovider.inchatMessage.isEmpty
-                      ? Center(
-                          child: AutoTypeText(
-                            text: "Let's Explore Chats",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20,
-                                letterSpacing: 1,
-                                color:
-                                    isDarkTheme ? Colors.white : Colors.black),
-                          ),
-                        )
-                      : ListView.builder(
-                          itemCount: chatprovider.inchatMessage.length,
-                          itemBuilder: (context, index) {
-                            final message = chatprovider.inchatMessage[index];
-                            return ListTile(
-                              title: Text(message.message.toString()),
-                            );
-                          },
-                        ),
+        if (chatprovider.inchatMessage.isNotEmpty) {
+          _scrolltoBottom();
+        }
+
+        chatprovider.addListener(() {
+          if (chatprovider.inchatMessage.isNotEmpty) {
+            _scrolltoBottom();
+          }
+        });
+        return Container(
+          decoration: isDarkTheme
+              ? BoxDecoration(
+                  gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black,
+                        Color(0xff0D1B2A),
+                        Color(0xff1C2541)
+                      ]),
+                )
+              : BoxDecoration(
+                  color: Color(0xFFF2F5FA),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          onChanged: (value) {
-                            setState(() {
-                              _message = value;
-                            });
-                          },
-                          decoration: InputDecoration(
-                              contentPadding: EdgeInsets.symmetric(
-                                  horizontal: 20, vertical: 15),
-                              border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(30)),
-                              hintText: "Ask me Anything..."),
-                        ),
-                      ),
-                      _message.isEmpty ? SizedBox.shrink() : SizedBox(width: 5),
-                      _message.isEmpty
-                          ? SizedBox.shrink()
-                          : CircleAvatar(
-                              backgroundColor: Colors.indigo,
-                              radius: 25,
-                              child: IconButton(
-                                onPressed: () {},
-                                icon: Icon(Icons.rocket, color: Colors.white),
+          child: Scaffold(
+            appBar: AppBar(
+              title: Text("Content"),
+            ),
+            backgroundColor: Colors.transparent,
+            body: SafeArea(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 10),
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: chatprovider.inchatMessage.isEmpty
+                          ? Center(
+                              child: AutoTypeText(
+                                text: "Let's Explore Chats",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 20,
+                                    letterSpacing: 1,
+                                    color: isDarkTheme
+                                        ? Colors.white
+                                        : Colors.black),
+                              ),
+                            )
+                          : ListView.builder(
+                              controller: _scrollController,
+                              itemCount: chatprovider.inchatMessage.length,
+                              itemBuilder: (context, index) {
+                                final message =
+                                    chatprovider.inchatMessage[index];
+                                return message.role == Role.user
+                                    ? MyMessageWidget(
+                                        data: message,
+                                      )
+                                    : AssistantMessageWidget(
+                                        data: message.message.toString(),
+                                      );
+                              },
+                            ),
+                    ),
+                    Column(
+                      children: [
+                        if (hasImages) const PreviewImageWidget(),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: _mesController,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _message = value;
+                                  });
+                                },
+                                onSubmitted: (value) {
+                                  sendMessage(
+                                      message: _mesController.text,
+                                      chatProvider: chatprovider,
+                                      isTextOnly: hasImages ? false : true);
+                                },
+                                decoration: InputDecoration(
+                                    prefixIcon: IconButton(
+                                      onPressed: () {
+                                        if (hasImages) {
+                                          chatprovider
+                                              .setImageFileList(imageList: []);
+                                        } else {
+                                          pickImage(chatprovider);
+                                        }
+                                      },
+                                      icon: Icon(hasImages
+                                          ? Icons.delete_forever
+                                          : Icons.image),
+                                    ),
+                                    contentPadding: EdgeInsets.symmetric(
+                                        horizontal: 20, vertical: 15),
+                                    filled: true,
+                                    fillColor: Colors.black,
+                                    border: OutlineInputBorder(
+                                        borderSide: BorderSide.none,
+                                        borderRadius:
+                                            BorderRadius.circular(30)),
+                                    hintText: hasImages
+                                        ? "Ask me about this Image..."
+                                        : "Ask me Anything..."),
                               ),
                             ),
-                    ],
-                  ),
-                )
-              ],
+                            _message.isEmpty
+                                ? SizedBox.shrink()
+                                : SizedBox(width: 5),
+                            _message.isEmpty
+                                ? SizedBox.shrink()
+                                : CircleAvatar(
+                                    backgroundColor: Colors.indigo,
+                                    radius: 25,
+                                    child: IconButton(
+                                      onPressed: () {
+                                        sendMessage(
+                                            message: _message,
+                                            chatProvider: chatprovider,
+                                            isTextOnly:
+                                                hasImages ? false : true);
+                                      },
+                                      icon: Icon(Icons.rocket_outlined,
+                                          color: Colors.white),
+                                    ),
+                                  ),
+                          ],
+                        ),
+                        SizedBox(height: 10),
+                      ],
+                    )
+                  ],
+                ),
+              ),
             ),
           ),
         );
