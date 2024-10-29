@@ -18,34 +18,66 @@ class MyMessageWidget extends StatelessWidget {
     return Align(
       alignment: Alignment.centerRight,
       child: Container(
-        constraints: BoxConstraints(maxWidth: size.width * .7),
+        constraints: data.imageUrls.isNotEmpty
+            ? BoxConstraints(maxWidth: size.width * .7)
+            : BoxConstraints(maxWidth: size.width * .7),
         decoration: BoxDecoration(
-          color: isDarkTheme ? Colors.indigo : Colors.grey[300],
+          color: data.imageUrls.isNotEmpty
+              ? Colors.transparent
+              : isDarkTheme
+                  ? Colors.indigo
+                  : Colors.grey[300],
           borderRadius: BorderRadius.circular(15),
         ),
         padding: EdgeInsets.all(15),
         margin: EdgeInsets.only(bottom: 10),
-        child: Column(
-          children: [
-            if (data.imagUrl.isNotEmpty)
-              PreviewImageWidget(
-                message: data,
+        child: data.imageUrls.isNotEmpty
+            ? SizedBox(
+                height: 100,
+                width: size.width * .3,
+                child: Stack(
+                  // crossAxisAlignment: CrossAxisAlignment.end,s
+                  children: [
+                    SizedBox(
+                      height: 80,
+                      width: 200,
+                      child: PreviewImageWidget(
+                        message: data,
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: Container(
+                        padding: EdgeInsets.all(10),
+                        // margin: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: isDarkTheme ? Colors.indigo : Colors.grey[300],
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: MarkdownBody(
+                          data: data.message.toString(),
+                          selectable: true,
+                          styleSheet: MarkdownStyleSheet(
+                            p: TextStyle(
+                              color: isDarkTheme ? Colors.white : Colors.black,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               )
-            else
-              const Text(
-                'No images to display.',
-                style: TextStyle(color: Colors.grey),
-              ),
-            MarkdownBody(
-              data: data.message.toString(),
-              styleSheet: MarkdownStyleSheet(
-                p: TextStyle(
-                  color: isDarkTheme ? Colors.white : Colors.black,
+            : MarkdownBody(
+                data: data.message.toString(),
+                selectable: true,
+                styleSheet: MarkdownStyleSheet(
+                  p: TextStyle(
+                    color: isDarkTheme ? Colors.white : Colors.black,
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
       ),
     );
   }

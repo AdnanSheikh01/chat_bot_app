@@ -1,3 +1,4 @@
+import 'package:chat_bot_app/widgets/auto_type_text.dart';
 import 'package:dash_chat_2/dash_chat_2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
@@ -40,6 +41,22 @@ class _NewChatPageState extends State<NewChatPage> {
   }
 
   @override
+  void initState() {
+    Future.delayed(Duration(seconds: 5), () {
+      setState(() {
+        messages.add(
+          ChatMessage(
+            text: 'Hello! How can I help you today?',
+            user: geminiUser,
+            createdAt: DateTime.now(),
+          ),
+        );
+      });
+    });
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     bool isDarkTheme = Theme.of(context).brightness == Brightness.dark;
     var size = MediaQuery.of(context).size;
@@ -66,107 +83,123 @@ class _NewChatPageState extends State<NewChatPage> {
                 fontSize: 22),
           ),
         ),
-        body: DashChat(
-          scrollToBottomOptions: ScrollToBottomOptions(
-            scrollToBottomBuilder: (scrollController) {
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Center(
-                    child: FloatingActionButton(
-                      shape: const CircleBorder(),
-                      mini: true,
-                      onPressed: () {
-                        scrollController.animateTo(
-                          scrollController.position.minScrollExtent,
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeOut,
-                        );
-                      },
-                      backgroundColor:
-                          isDarkTheme ? Colors.white : Colors.black,
-                      child: Icon(
-                        Icons.arrow_downward,
+        body: messages.isEmpty
+            ? Center(
+                child: AutoTypeText(
+                  text: "Your chat history stays only with you.",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                      letterSpacing: 1,
+                      color: isDarkTheme ? Colors.white : Colors.black),
+                ),
+              )
+            : DashChat(
+                scrollToBottomOptions: ScrollToBottomOptions(
+                  scrollToBottomBuilder: (scrollController) {
+                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Center(
+                          child: FloatingActionButton(
+                            shape: const CircleBorder(),
+                            mini: true,
+                            onPressed: () {
+                              scrollController.animateTo(
+                                scrollController.position.minScrollExtent,
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeOut,
+                              );
+                            },
+                            backgroundColor:
+                                isDarkTheme ? Colors.white : Colors.black,
+                            child: Icon(
+                              Icons.arrow_downward,
+                              color: isDarkTheme ? Colors.black : Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+                typingUsers: typing,
+                messageListOptions: const MessageListOptions(
+                  showDateSeparator: true,
+                ),
+                messageOptions: MessageOptions(
+                    messageTextBuilder:
+                        (message, previousMessage, nextMessage) {
+                      return MarkdownBody(
+                        data: message.text,
+                        styleSheet: MarkdownStyleSheet(
+                          p: TextStyle(
+                            color: isDarkTheme ? Colors.white : Colors.black,
+                          ),
+                        ),
+                      );
+                    },
+                    messagePadding: EdgeInsets.all(15),
+                    textColor: isDarkTheme ? Colors.white : Colors.black,
+                    containerColor: isDarkTheme ? Colors.black : Colors.white,
+                    currentUserTextColor:
+                        isDarkTheme ? Colors.white : Colors.black,
+                    currentUserContainerColor:
+                        isDarkTheme ? Colors.indigo : Colors.grey[300]),
+                inputOptions: InputOptions(
+                  sendButtonBuilder: (send) {
+                    return SizedBox(
+                      height: size.height * .05,
+                      child: ElevatedButton(
+                        onPressed: send,
+                        style: ElevatedButton.styleFrom(
+                          elevation: 0,
+                          foregroundColor:
+                              isDarkTheme ? Colors.white : Colors.black,
+                          padding: EdgeInsets.zero,
+                        ),
+                        child: const Icon(Icons.send),
+                      ),
+                    );
+                  },
+                  autocorrect: true,
+                  sendOnEnter: true,
+                  inputDecoration: InputDecoration(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+                    hintText: 'How can I help you?',
+                    hintStyle: TextStyle(color: Colors.grey),
+                    filled: true,
+                    fillColor: isDarkTheme ? Colors.black : Colors.white,
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
                         color: isDarkTheme ? Colors.black : Colors.white,
                       ),
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: isDarkTheme
+                            ? Colors.grey.shade900
+                            : Colors.grey.shade300,
+                      ),
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: isDarkTheme
+                            ? Colors.grey.shade900
+                            : Colors.grey.shade300,
+                      ),
+                      borderRadius: BorderRadius.circular(30),
                     ),
                   ),
-                ],
-              );
-            },
-          ),
-          typingUsers: typing,
-          messageListOptions: const MessageListOptions(
-            showDateSeparator: true,
-          ),
-          messageOptions: MessageOptions(
-              messageTextBuilder: (message, previousMessage, nextMessage) {
-                return MarkdownBody(
-                  data: message.text,
-                  styleSheet: MarkdownStyleSheet(
-                    p: TextStyle(
-                      color: isDarkTheme ? Colors.white : Colors.black,
-                    ),
-                  ),
-                );
-              },
-              messagePadding: EdgeInsets.all(15),
-              textColor: isDarkTheme ? Colors.white : Colors.black,
-              containerColor: isDarkTheme ? Colors.black : Colors.white,
-              currentUserTextColor: isDarkTheme ? Colors.white : Colors.black,
-              currentUserContainerColor:
-                  isDarkTheme ? Colors.indigo : Colors.grey[300]),
-          inputOptions: InputOptions(
-            sendButtonBuilder: (send) {
-              return SizedBox(
-                height: size.height * .05,
-                child: ElevatedButton(
-                  onPressed: send,
-                  style: ElevatedButton.styleFrom(
-                    elevation: 0,
-                    foregroundColor: isDarkTheme ? Colors.white : Colors.black,
-                    padding: EdgeInsets.zero,
-                  ),
-                  child: const Icon(Icons.send),
                 ),
-              );
-            },
-            autocorrect: true,
-            sendOnEnter: true,
-            inputDecoration: InputDecoration(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 20),
-              hintText: 'How can I help you?',
-              hintStyle: TextStyle(color: Colors.grey),
-              filled: true,
-              fillColor: isDarkTheme ? Colors.black : Colors.white,
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: isDarkTheme ? Colors.black : Colors.white,
-                ),
-                borderRadius: BorderRadius.circular(30),
+                currentUser: myUser,
+                onSend: (ChatMessage message) {
+                  getData(message);
+                },
+                messages: messages,
               ),
-              border: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color:
-                      isDarkTheme ? Colors.grey.shade900 : Colors.grey.shade300,
-                ),
-                borderRadius: BorderRadius.circular(30),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color:
-                      isDarkTheme ? Colors.grey.shade900 : Colors.grey.shade300,
-                ),
-                borderRadius: BorderRadius.circular(30),
-              ),
-            ),
-          ),
-          currentUser: myUser,
-          onSend: (ChatMessage message) {
-            getData(message);
-          },
-          messages: messages,
-        ),
       ),
     );
   }

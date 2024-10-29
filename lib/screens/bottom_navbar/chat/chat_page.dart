@@ -49,7 +49,7 @@ class _ChatPageState extends State<ChatPage> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => NewChatPage(
-                        appTitle: "New Chat",
+                        appTitle: "Incognito Chat",
                       ),
                     ),
                   ),
@@ -73,7 +73,7 @@ class _ChatPageState extends State<ChatPage> {
                           ),
                           SizedBox(width: 10),
                           Text(
-                            "New Chat",
+                            "Incognito Chat",
                             style: TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,

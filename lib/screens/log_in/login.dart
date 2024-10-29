@@ -1,9 +1,6 @@
-import 'dart:developer';
 import 'package:chat_bot_app/widgets/double_tap_to_exit.dart';
 import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import '../../auth/firebase_auth.dart';
-import '../bottom_navbar/bottom_navbar.dart';
 import '../forget_pass/forget_pass.dart';
 import '../sign_up/new_member.dart';
 import '../../widgets/auto_type_text.dart';
@@ -19,7 +16,6 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _auth = FirebaseAuthServices();
   final _key = GlobalKey<FormState>();
-  final _googleSignIn = GoogleSignIn();
 
   bool _obscurePassword = true;
   String _email = '', _password = '';
@@ -43,7 +39,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   SizedBox(height: size.height * .08),
                   _buildHeader(),
-                  const SizedBox(height: 20),
+                  SizedBox(height: size.height * .05),
                   _buildTextField(
                     hintText: "Email",
                     prefixIcon: Icons.email_outlined,
@@ -82,8 +78,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       }
                     },
                   ),
-                  const SizedBox(height: 30),
-                  _buildSocialLoginSection(isDarkTheme),
                   const SizedBox(height: 30),
                   _buildNewMemberSection(context, isDarkTheme),
                   const SizedBox(height: 30),
@@ -195,69 +189,6 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ],
     );
-  }
-
-  Widget _buildSocialLoginSection(bool isDarkTheme) {
-    return Column(
-      children: [
-        Center(
-          child: Text(
-            "Or Sign In With",
-            style: TextStyle(
-              color: isDarkTheme ? Colors.white70 : Colors.grey.shade700,
-            ),
-          ),
-        ),
-        const SizedBox(height: 30),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildSocialIcon("Apple", "assets/images/apple.png"),
-            _buildSocialIcon("Google", "assets/images/google.png",
-                onTap: _handleGoogleSignIn),
-            _buildSocialIcon("Microsoft", "assets/images/microsoft.png"),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSocialIcon(String label, String asset, {VoidCallback? onTap}) {
-    return Column(
-      children: [
-        InkWell(
-          onTap: onTap ?? () => log("$label tapped"),
-          child: CircleAvatar(
-            radius: 20,
-            backgroundImage: AssetImage(asset),
-            backgroundColor: Colors.transparent,
-          ),
-        ),
-        const SizedBox(height: 5),
-        Text(label),
-      ],
-    );
-  }
-
-  Future<void> _handleGoogleSignIn() async {
-    try {
-      final googleUser = await _googleSignIn.signIn().then((value) {
-        if (mounted) {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(
-              builder: (context) => BottomNavbarScreen(),
-            ),
-            (route) => false,
-          );
-        }
-      });
-      if (googleUser != null) {
-        log('User signed in: ${googleUser.displayName}');
-      }
-    } catch (error) {
-      log('Sign-in failed: $error');
-    }
   }
 
   Widget _buildNewMemberSection(BuildContext context, bool isDarkTheme) {

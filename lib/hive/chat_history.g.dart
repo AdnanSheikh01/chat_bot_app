@@ -19,20 +19,26 @@ class ChatHistoryAdapter extends TypeAdapter<ChatHistory> {
     return ChatHistory(
       uid: fields[0] as String,
       name: fields[1] as String,
-      image: fields[2] as String,
+      response: fields[2] as String,
+      image: (fields[3] as List).cast<String>(),
+      timestamp: fields[4] as DateTime,
     );
   }
 
   @override
   void write(BinaryWriter writer, ChatHistory obj) {
     writer
-      ..writeByte(3)
+      ..writeByte(5)
       ..writeByte(0)
       ..write(obj.uid)
       ..writeByte(1)
       ..write(obj.name)
       ..writeByte(2)
-      ..write(obj.image);
+      ..write(obj.response)
+      ..writeByte(3)
+      ..write(obj.image)
+      ..writeByte(4)
+      ..write(obj.timestamp);
   }
 
   @override

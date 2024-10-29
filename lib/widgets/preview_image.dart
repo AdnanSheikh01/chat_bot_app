@@ -13,14 +13,8 @@ class PreviewImageWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<ChatProvider>(
       builder: (context, chatprovider, child) {
-        // Extract the images list based on message or provider state
-        final imageFiles = message != null
-            ? message!.imagUrl
-            : chatprovider.imageFileList?.map((e) => e.path).toList();
-
-        if (imageFiles == null || imageFiles.isEmpty) {
-          return const SizedBox.shrink(); // No images to display
-        }
+        final imageFiles =
+            message != null ? message!.imageUrls : chatprovider.imageFileList;
 
         final padding = message != null
             ? EdgeInsets.zero
@@ -32,14 +26,16 @@ class PreviewImageWidget extends StatelessWidget {
             height: 80,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              itemCount: imageFiles.length,
+              itemCount: imageFiles!.length,
               itemBuilder: (context, index) {
                 return Padding(
                   padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(20),
                     child: Image.file(
-                      File(imageFiles[index]),
+                      File(message != null
+                          ? message!.imageUrls[index]
+                          : chatprovider.imageFileList![index].path),
                       height: 80,
                       width: 80,
                       fit: BoxFit.cover,

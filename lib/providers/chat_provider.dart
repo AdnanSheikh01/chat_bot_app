@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:typed_data';
 
+import 'package:chat_bot_app/hive/boxes.dart';
 import 'package:chat_bot_app/hive/chat_history.dart';
 import 'package:chat_bot_app/hive/user_model.dart';
 import 'package:chat_bot_app/models/message.dart';
@@ -14,7 +15,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
 class ChatProvider extends ChangeNotifier {
-  List<Message> _inChatMessage = [];
+  final List<Message> _inChatMessage = [];
   final PageController _pageController = PageController();
   List<XFile>? _imageFileList = [];
   int _currentIndex = 0;
@@ -80,17 +81,12 @@ class ChatProvider extends ChangeNotifier {
 // Function to Set the Model Based on Bool
 
   Future<void> setModel({required bool isTextOnly}) async {
-    if (isTextOnly) {
-      _model = _textModel ??
-          GenerativeModel(
-              model: setCurrentModel(newModel: "gemini-pro"),
-              apiKey: Utils.apiKey);
-    } else {
-      _model = _visionModel ??
-          GenerativeModel(
-              model: setCurrentModel(newModel: "gemini-pro-vision"),
-              apiKey: Utils.apiKey);
-    }
+    _model ??= (isTextOnly ? _textModel : _visionModel) ??
+        GenerativeModel(
+          model: setCurrentModel(
+              newModel: isTextOnly ? "gemini-1.5-flash" : "gemini-1.5-pro"),
+          apiKey: Utils.apiKey,
+        );
 
     notifyListeners();
   }
@@ -111,6 +107,51 @@ class ChatProvider extends ChangeNotifier {
   void setLoading({required bool newLoading}) {
     _isloading = newLoading;
     notifyListeners();
+  }
+
+// delete Chat
+  Future<void> deletChatMessage({required String chatID}) async {
+    if (!Hive.isBoxOpen("${Contrants.chatMessages}$chatID")) {
+      await Hive.openBox("${Contrants.chatMessages}$chatID");
+
+      await Hive.box("${Contrants.chatMessages}$chatID").clear();
+      await Hive.box("${Contrants.chatMessages}$chatID").close();
+    } else {
+      await Hive.box("${Contrants.chatMessages}$chatID").clear();
+      await Hive.box("${Contrants.chatMessages}$chatID").close();
+    }
+
+    //get the current chat id, if not empty
+    if (currentChatId.isNotEmpty) {
+      if (currentChatId == chatID) {
+        setCurrentChatId(newChatId: "");
+        _inChatMessage.clear();
+        notifyListeners();
+      }
+    }
+  }
+
+// prepare chat room
+  Future<void> prepareChatRoom(
+      {required bool isNewChat, required String chatID}) async {
+    if (!isNewChat) {
+      // load chat from db
+      final chatHistory = await loadMessage(chatId: chatID);
+
+      //clearing inchatmessage
+      inchatMessage.clear();
+
+      for (var mesage in chatHistory) {
+        _inChatMessage.add(mesage);
+      }
+
+      //set current chat id
+      setCurrentChatId(newChatId: chatID);
+    } else {
+      _inChatMessage.clear();
+
+      setCurrentChatId(newChatId: chatID);
+    }
   }
 
 // Gettign gemini reponse
@@ -134,16 +175,21 @@ class ChatProvider extends ChangeNotifier {
     //get th images urls
     List<String> imagesUrls = getImageUrls(isTextOnly: isTextOnly);
 
+    final messageBox = await Hive.openBox('${Contrants.chatMessages}$chatId');
+
     //user message id
-    final userMessageId = const Uuid().v4();
+    final userMessageId = messageBox.keys.length;
+
+    //assistant message id
+    final assistantMessageId = messageBox.keys.length + 1;
 
     //get the user message
     final userMessage = Message(
-      messageId: userMessageId,
+      messageId: userMessageId.toString(),
       chatId: chatId,
       role: Role.user,
       message: StringBuffer(message),
-      imagUrl: imagesUrls,
+      imageUrls: imagesUrls,
       timeSent: DateTime.now(),
     );
 
@@ -161,7 +207,9 @@ class ChatProvider extends ChangeNotifier {
         chatId: chatId,
         isTextOnly: isTextOnly,
         history: history,
-        userMessage: userMessage);
+        userMessage: userMessage,
+        modelMessageId: assistantMessageId.toString(),
+        messageBox: messageBox);
   }
 
 // send the message to the model and wait for the response
@@ -170,7 +218,9 @@ class ChatProvider extends ChangeNotifier {
       required String chatId,
       required bool isTextOnly,
       required List<Content> history,
-      required Message userMessage}) async {
+      required Message userMessage,
+      required String modelMessageId,
+      required Box messageBox}) async {
     final chatSession = _model!
         .startChat(history: history.isEmpty || !isTextOnly ? null : history);
 
@@ -203,8 +253,13 @@ class ChatProvider extends ChangeNotifier {
             .write(event.text);
         notifyListeners();
       },
-      onDone: () {
+      onDone: () async {
         //save message to hive db
+        await saveDataInHiveDB(
+            chatID: chatId,
+            userMessage: userMessage,
+            assistantMessage: assistantMessage,
+            messageBox: messageBox);
 
         //set loading to false
         setLoading(newLoading: false);
@@ -215,6 +270,35 @@ class ChatProvider extends ChangeNotifier {
     });
   }
 
+// save to hive db
+  Future<void> saveDataInHiveDB(
+      {required String chatID,
+      required Message userMessage,
+      required Message assistantMessage,
+      required Box messageBox}) async {
+    //save the user message
+    await messageBox.add(userMessage.toMap());
+
+    //save the assistant message
+    await messageBox.add(assistantMessage.toMap());
+
+    //save the history with same chatID
+    final chatHistoryBox = Boxes.getChatHistory();
+
+    final chatHistory = ChatHistory(
+        uid: chatID,
+        name: userMessage.message.toString(),
+        response: assistantMessage.message.toString(),
+        image: userMessage.imageUrls,
+        timestamp: DateTime.now());
+
+    await chatHistoryBox.put(chatID, chatHistory);
+
+    //close the box
+
+    await messageBox.close();
+  }
+
 // get Content
   Future<Content> getContent({
     required String message,
@@ -223,24 +307,39 @@ class ChatProvider extends ChangeNotifier {
     if (isTextOnly) {
       return Content.text(message);
     } else {
-      final futureImage = _imageFileList
-          ?.map((imageFile) => imageFile.readAsBytes())
-          .toList(growable: false);
+      if (_imageFileList == null || _imageFileList!.isEmpty) {
+        log("Image list is empty.");
+        return Content.text("No images found.");
+      }
 
-      final imageByte = await Future.wait(futureImage!);
-      final propmt = TextPart(message);
-      final imageParts = imageByte
-          .map((bytes) => DataPart('image/jpeg', Uint8List.fromList(bytes)))
-          .toList();
+      // final futureImage = _imageFileList!
+      //     .map((imageFile) => imageFile.readAsBytes())
+      //     .toList(growable: false);
+      final futureImage = _imageFileList!.map((imageFile) async {
+        try {
+          return await imageFile.readAsBytes();
+        } catch (e) {
+          log("Error reading image bytes: $e");
+          return Uint8List(0);
+        }
+      });
 
-      return Content.multi([propmt, ...imageParts]);
+      final imageByte = await Future.wait(futureImage);
+      if (imageByte.any((bytes) => bytes.isEmpty)) {
+        throw Exception("Some images could not be read properly.");
+      }
+      final prompt = TextPart(message);
+      final imageParts =
+          imageByte.map((bytes) => DataPart('image/jpeg', bytes)).toList();
+
+      return Content.multi([prompt, ...imageParts]);
     }
   }
 
 // get the image Urls
   List<String> getImageUrls({required bool isTextOnly}) {
     List<String> imageUrls = [];
-    if (!isTextOnly && imageUrls.isNotEmpty) {
+    if (!isTextOnly && imageFileList != null) {
       for (var image in imageFileList!) {
         imageUrls.add(image.path);
       }
@@ -281,7 +380,7 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
-  static initHive() async {
+  static Future<void> initHive() async {
     final dir = await getApplicationDocumentsDirectory();
     Hive.init(dir.path);
 

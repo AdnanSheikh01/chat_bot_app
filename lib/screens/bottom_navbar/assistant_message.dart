@@ -17,7 +17,7 @@ class AssistantMessageWidget extends StatelessWidget {
     return Align(
       alignment: Alignment.centerLeft,
       child: Container(
-        constraints: BoxConstraints(maxWidth: size.width * .9),
+        constraints: BoxConstraints(maxWidth: size.width * .7),
         decoration: BoxDecoration(
           color: data.isEmpty
               ? Colors.transparent
@@ -33,11 +33,14 @@ class AssistantMessageWidget extends StatelessWidget {
                 color: Colors.transparent,
                 child: Row(
                   children: [
-                    Text("Bot Buddy is typing"),
-                    SizedBox(width: 5),
                     SpinKitThreeBounce(
-                      color: Colors.grey,
-                      size: 15,
+                      color: isDarkTheme ? Colors.white : Colors.black,
+                      size: 12,
+                    ),
+                    SizedBox(width: 5),
+                    Text(
+                      "Bot Buddy is typing",
+                      style: TextStyle(fontSize: 12),
                     ),
                   ],
                 ),

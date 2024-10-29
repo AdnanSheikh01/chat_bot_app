@@ -37,7 +37,7 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
       final user = FirebaseAuth.instance.currentUser;
 
       if (user!.emailVerified) {
-        timer.cancel(); // Cancel the timer once email is verified
+        timer.cancel();
 
         showDialog(
           context: context,

@@ -1,10 +1,16 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:developer';
 
+import 'package:chat_bot_app/controller/user_controller.dart';
 import 'package:chat_bot_app/screens/bottom_navbar/bottom_navbar.dart';
 import 'package:chat_bot_app/screens/sign_up/confirm_email.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
+final UserController userController = Get.put(UserController());
 
 class FirebaseAuthServices {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -57,36 +63,30 @@ class FirebaseAuthServices {
       if (e.code == 'invalid-credential') {
         // Display an error message to the user
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-                "The supplied auth credential is malformed or has expired."),
-          ),
-        );
+        Get.snackbar(
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+            "Error!",
+            "The supplied auth credential is malformed or has expired.");
       } else if (e.code == 'email-already-in-use') {
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("User Already exists for that email."),
-          ),
-        );
+        Get.snackbar(
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+            "Error!",
+            "User Already exists for that email.");
       } else if (e.code == 'weak-password') {
         Navigator.pop(context);
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Weak Password."),
-          ),
-        );
+        Get.snackbar(colorText: Colors.white, "Info!", "Weak Password.");
       } else {
         // Handle other Firebase sign-in errors if necessary
         Navigator.pop(context);
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Error Occured. Try Again Later."),
-          ),
-        );
+        Get.snackbar(
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+            "Error!",
+            "Error Occured. Try Again Later.");
       }
     }
     return null;
@@ -133,6 +133,8 @@ class FirebaseAuthServices {
         String fullName = userDoc.get('fullName');
         log('User full name: $fullName');
         Navigator.pop(context);
+
+        userController.setUserDetails(fullName, email);
         FirebaseAuth.instance.currentUser!.emailVerified
             ? Navigator.pushAndRemoveUntil(
                 context,
@@ -155,41 +157,42 @@ class FirebaseAuthServices {
       if (e.code == 'email-already-in-use') {
         // Show an error message to the user
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content:
-                Text("The email address is already in use by another account."),
-          ),
-        );
+        Get.snackbar(
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+            "Error!",
+            "The email address is already in use by another account.");
       } else if (e.code == 'invalid-email') {
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Invalid User."),
-          ),
-        );
+        Get.snackbar(
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+            "Error!",
+            "Invalid User.");
       } else if (e.code == 'wrong-password') {
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Wrong Password."),
-          ),
-        );
+
+        Get.snackbar(
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+            "Error!",
+            "Wrong Password.");
       } else if (e.code == 'invalid-credential') {
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("No user found for that email."),
-          ),
-        );
+
+        Get.snackbar(
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+            "Error!",
+            "No user found for that email.");
       } else {
         // Handle other errors if necessary
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Sign in Failed. Try Again Later."),
-          ),
-        );
+        Get.snackbar(
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+            "Error!",
+            "Sign in Failed. Try Again Later.");
       }
     }
     return null;

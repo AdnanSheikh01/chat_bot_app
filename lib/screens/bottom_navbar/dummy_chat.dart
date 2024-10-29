@@ -1,13 +1,11 @@
-import 'dart:developer';
-
 import 'package:chat_bot_app/models/message.dart';
 import 'package:chat_bot_app/providers/chat_provider.dart';
 import 'package:chat_bot_app/screens/bottom_navbar/assistant_message.dart';
 import 'package:chat_bot_app/screens/bottom_navbar/my_message.dart';
 import 'package:chat_bot_app/widgets/auto_type_text.dart';
 import 'package:chat_bot_app/widgets/preview_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
@@ -29,13 +27,36 @@ class _ChatScreenDumState extends State<ChatScreenDum> {
       required ChatProvider chatProvider,
       required bool isTextOnly}) async {
     try {
-      chatProvider.getMessage(message: message, isTextOnly: isTextOnly);
+      await chatProvider.getMessage(message: message, isTextOnly: isTextOnly);
     } catch (e) {
-      log("error: $e");
+      Get.snackbar("Error!", 'Failed while getting image.',
+          colorText: Colors.white, backgroundColor: Colors.red);
     } finally {
       _mesController.clear();
       chatProvider.setImageFileList(imageList: []);
       _message = "";
+    }
+  }
+
+  Future<void> openImagePicker({required ChatProvider chatprovider}) async {
+    try {
+      List<XFile>? pickedImages = await _imagePicker.pickMultiImage(
+        maxHeight: 800,
+        maxWidth: 800,
+        imageQuality: 95,
+      );
+
+      if (pickedImages.isNotEmpty) {
+        chatprovider.setImageFileList(imageList: pickedImages);
+        setState(() {});
+      }
+    } catch (e) {
+      Get.snackbar(
+        "Error!",
+        'Failed to get image.',
+        colorText: Colors.white,
+        backgroundColor: Colors.red,
+      );
     }
   }
 
@@ -58,26 +79,14 @@ class _ChatScreenDumState extends State<ChatScreenDum> {
     });
   }
 
-  void pickImage(ChatProvider chatprovider) async {
-    try {
-      final pickedImages = await _imagePicker.pickMultiImage(
-          maxHeight: 800, maxWidth: 800, imageQuality: 95);
-      chatprovider.setImageFileList(imageList: pickedImages);
-
-      setState(() {});
-    } catch (e) {
-      log("Error: $e");
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final chatprovider = Provider.of<ChatProvider>(context);
     bool isDarkTheme = Theme.of(context).brightness == Brightness.dark;
-    bool hasImages = chatprovider.imageFileList != null &&
-        chatprovider.imageFileList!.isNotEmpty;
+
     return Consumer<ChatProvider>(
       builder: (context, chatprovider, state) {
+        bool hasImages = chatprovider.imageFileList != null &&
+            chatprovider.imageFileList!.isNotEmpty;
         if (chatprovider.inchatMessage.isNotEmpty) {
           _scrolltoBottom();
         }
@@ -87,6 +96,7 @@ class _ChatScreenDumState extends State<ChatScreenDum> {
             _scrolltoBottom();
           }
         });
+
         return Container(
           decoration: isDarkTheme
               ? BoxDecoration(
@@ -105,11 +115,60 @@ class _ChatScreenDumState extends State<ChatScreenDum> {
           child: Scaffold(
             appBar: AppBar(
               title: Text("Content"),
+              actions: [
+                if (chatprovider.inchatMessage.isNotEmpty)
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            isDarkTheme ? Colors.white : Colors.black,
+                        foregroundColor:
+                            isDarkTheme ? Colors.black : Colors.white),
+                    onPressed: () async {
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (context) => AlertDialog(
+                          title: Text("Start New Chat"),
+                          content: Text(
+                              "Are you sure you want to start a new chat?"),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              child: Text(
+                                "Cancel",
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () async {
+                                await chatprovider.prepareChatRoom(
+                                    isNewChat: true, chatID: "");
+                                Navigator.pop(context);
+                                Get.snackbar("Success",
+                                    "New Chat Generated Successfully",
+                                    backgroundColor: Colors.green,
+                                    colorText: Colors.white);
+                              },
+                              child: Text(
+                                "Yes",
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                    label: Text("New Chat"),
+                    icon: Icon(Icons.add),
+                  )
+              ],
             ),
             backgroundColor: Colors.transparent,
             body: SafeArea(
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 10),
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                 child: Column(
                   children: [
                     Expanded(
@@ -136,9 +195,43 @@ class _ChatScreenDumState extends State<ChatScreenDum> {
                                     ? MyMessageWidget(
                                         data: message,
                                       )
-                                    : AssistantMessageWidget(
-                                        data: message.message.toString(),
-                                      );
+                                    : message.message.toString().isEmpty
+                                        ? AssistantMessageWidget(
+                                            data: message.message.toString(),
+                                          )
+                                        : Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              CircleAvatar(
+                                                child: Text("B"),
+                                              ),
+                                              SizedBox(width: 5),
+                                              Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                            left: 10),
+                                                    child: Text(
+                                                      "Bot Buddy",
+                                                      style: TextStyle(
+                                                        fontSize: 10,
+                                                        color: Colors.grey,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  SizedBox(height: 2),
+                                                  AssistantMessageWidget(
+                                                    data: message.message
+                                                        .toString(),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          );
                               },
                             ),
                     ),
@@ -149,26 +242,64 @@ class _ChatScreenDumState extends State<ChatScreenDum> {
                           children: [
                             Expanded(
                               child: TextField(
+                                textInputAction: TextInputAction.send,
                                 controller: _mesController,
                                 onChanged: (value) {
                                   setState(() {
                                     _message = value;
                                   });
                                 },
-                                onSubmitted: (value) {
-                                  sendMessage(
-                                      message: _mesController.text,
-                                      chatProvider: chatprovider,
-                                      isTextOnly: hasImages ? false : true);
-                                },
+                                onSubmitted: chatprovider.isloading
+                                    ? null
+                                    : (val) {
+                                        sendMessage(
+                                            message: _message,
+                                            chatProvider: chatprovider,
+                                            isTextOnly:
+                                                hasImages ? false : true);
+                                      },
                                 decoration: InputDecoration(
                                     prefixIcon: IconButton(
-                                      onPressed: () {
+                                      onPressed: () async {
                                         if (hasImages) {
-                                          chatprovider
-                                              .setImageFileList(imageList: []);
+                                          showDialog(
+                                            context: context,
+                                            barrierDismissible: false,
+                                            builder: (context) => AlertDialog(
+                                              title: Text("Delete Image"),
+                                              content: Text("Are you sure?"),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Navigator.pop(context);
+                                                  },
+                                                  child: Text(
+                                                    "Cancel",
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                  ),
+                                                ),
+                                                TextButton(
+                                                  onPressed: () {
+                                                    chatprovider
+                                                        .setImageFileList(
+                                                            imageList: []);
+                                                    Navigator.pop(context);
+                                                  },
+                                                  child: Text(
+                                                    "Delete",
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          );
                                         } else {
-                                          pickImage(chatprovider);
+                                          openImagePicker(
+                                              chatprovider: chatprovider);
                                         }
                                       },
                                       icon: Icon(hasImages
@@ -178,7 +309,9 @@ class _ChatScreenDumState extends State<ChatScreenDum> {
                                     contentPadding: EdgeInsets.symmetric(
                                         horizontal: 20, vertical: 15),
                                     filled: true,
-                                    fillColor: Colors.black,
+                                    fillColor: isDarkTheme
+                                        ? Colors.black
+                                        : Colors.white,
                                     border: OutlineInputBorder(
                                         borderSide: BorderSide.none,
                                         borderRadius:
@@ -197,20 +330,21 @@ class _ChatScreenDumState extends State<ChatScreenDum> {
                                     backgroundColor: Colors.indigo,
                                     radius: 25,
                                     child: IconButton(
-                                      onPressed: () {
-                                        sendMessage(
-                                            message: _message,
-                                            chatProvider: chatprovider,
-                                            isTextOnly:
-                                                hasImages ? false : true);
-                                      },
+                                      onPressed: chatprovider.isloading
+                                          ? null
+                                          : () {
+                                              sendMessage(
+                                                  message: _message,
+                                                  chatProvider: chatprovider,
+                                                  isTextOnly:
+                                                      hasImages ? false : true);
+                                            },
                                       icon: Icon(Icons.rocket_outlined,
                                           color: Colors.white),
                                     ),
                                   ),
                           ],
                         ),
-                        SizedBox(height: 10),
                       ],
                     )
                   ],

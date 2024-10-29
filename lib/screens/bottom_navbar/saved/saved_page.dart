@@ -1,86 +1,168 @@
-import 'package:chat_bot_app/screens/bottom_navbar/chat/new_chat.dart';
+import 'package:chat_bot_app/hive/boxes.dart';
+import 'package:chat_bot_app/hive/chat_history.dart';
+import 'package:chat_bot_app/providers/chat_provider.dart';
+import 'package:chat_bot_app/widgets/auto_type_text.dart';
 import 'package:flutter/material.dart';
 
-class SavedPage extends StatelessWidget {
+import 'package:get/get.dart';
+import 'package:markdown/markdown.dart' as md;
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:provider/provider.dart';
+
+class SavedPage extends StatefulWidget {
   const SavedPage({super.key});
+
+  @override
+  State<SavedPage> createState() => _SavedPageState();
+}
+
+class _SavedPageState extends State<SavedPage> {
+  String markdownToPlainText(String markdown) {
+    final lines = md.Document().parseLines(markdown.split('\n'));
+    return lines.map((e) => e.textContent).join(' ');
+  }
 
   @override
   Widget build(BuildContext context) {
     bool isDarkTheme = Theme.of(context).brightness == Brightness.dark;
-
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        centerTitle: false,
-        title: Text(
-          'Saved',
-          style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: isDarkTheme ? Colors.white : Colors.black,
-              fontSize: 22),
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 10),
-            child: IconButton(onPressed: () {}, icon: CircleAvatar()),
-          )
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                GestureDetector(
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => NewChatPage(
-                        appTitle: "New Chat",
-                      ),
-                    ),
-                  ),
-                  child: Container(
-                    margin: EdgeInsets.only(right: 20),
-                    decoration: BoxDecoration(
-                      color: Colors.indigo,
-                      borderRadius: BorderRadius.circular(40),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.only(
-                          bottom: 8, top: 8, left: 10, right: 20),
-                      child: Row(
-                        children: [
-                          CircleAvatar(
-                            backgroundColor:
-                                isDarkTheme ? Colors.black : Colors.white,
-                            child: Icon(
-                              Icons.add,
-                              color: isDarkTheme ? Colors.white : Colors.black,
+    return Consumer<ChatProvider>(
+      builder: (context, chatprovider, state) {
+        return Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            centerTitle: false,
+            title: Text(
+              "Chat History",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+            ),
+            actions: [
+              Padding(
+                padding: const EdgeInsets.only(right: 10),
+                child: IconButton(onPressed: () {}, icon: CircleAvatar()),
+              )
+            ],
+          ),
+          body: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: ValueListenableBuilder<Box<ChatHistory>>(
+                valueListenable: Boxes.getChatHistory().listenable(),
+                builder:
+                    (BuildContext context, Box<ChatHistory> box, Widget? _) {
+                  final chaHistory =
+                      box.values.toList().cast<ChatHistory>().reversed.toList();
+                  return chaHistory.isEmpty
+                      ? SizedBox(
+                          height: MediaQuery.of(context).size.height * .7,
+                          child: Center(
+                            child: AutoTypeText(
+                              text: "Ask Bot Buddy to Create History",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20,
+                                  letterSpacing: 1,
+                                  color: isDarkTheme
+                                      ? Colors.white
+                                      : Colors.black),
                             ),
                           ),
-                          SizedBox(width: 10),
-                          Text(
-                            "New Chat",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                IconButton(onPressed: () {}, icon: Icon(Icons.search))
-              ],
+                        )
+                      : SizedBox(
+                          height: MediaQuery.of(context).size.height,
+                          child: ListView.builder(
+                            itemCount: chaHistory.length,
+                            itemBuilder: (context, index) {
+                              final chat = chaHistory[index];
+
+                              var plainText =
+                                  markdownToPlainText(chat.response);
+                              return Card(
+                                margin: EdgeInsets.only(bottom: 15),
+                                shadowColor:
+                                    isDarkTheme ? Colors.blue : Colors.black,
+                                child: ListTile(
+                                  onLongPress: () {
+                                    showDialog(
+                                      context: context,
+                                      barrierDismissible: false,
+                                      builder: (context) => AlertDialog(
+                                        title: Text("Delete Chat"),
+                                        content: Text("Are you sure?"),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                            },
+                                            child: Text(
+                                              "Cancel",
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                          ),
+                                          TextButton(
+                                            onPressed: () async {
+                                              await context
+                                                  .read<ChatProvider>()
+                                                  .deletChatMessage(
+                                                      chatID: chat.uid);
+                                              await chat.delete();
+                                              Navigator.pop(context);
+                                              Get.snackbar("Success",
+                                                  "Chat Deleted Successfully",
+                                                  backgroundColor: Colors.green,
+                                                  colorText: Colors.white);
+                                            },
+                                            child: Text(
+                                              "Delete",
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                  onTap: () async {
+                                    final chatprovider =
+                                        context.read<ChatProvider>();
+                                    await chatprovider.prepareChatRoom(
+                                        isNewChat: false, chatID: chat.uid);
+
+                                    chatprovider.setCurrentIndex(newIndex: 1);
+                                    chatprovider.pageController.jumpToPage(1);
+                                  },
+                                  leading: CircleAvatar(
+                                    backgroundColor: chat.image.isNotEmpty
+                                        ? Colors.green
+                                        : Colors.blue,
+                                    child: Icon(
+                                        chat.image.isNotEmpty
+                                            ? Icons.image
+                                            : Icons.text_snippet_rounded,
+                                        color: Colors.white),
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10)),
+                                  title: Text(chat.name),
+                                  subtitle: Text(
+                                    plainText,
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 2,
+                                  ),
+                                  trailing:
+                                      Icon(Icons.arrow_forward_ios_rounded),
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                },
+              ),
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

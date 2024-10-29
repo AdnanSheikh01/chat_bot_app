@@ -46,8 +46,8 @@ class _ImageGeneratorPageState extends State<ImageGeneratorPage> {
       });
 
       if (image == null) {
-        Get.snackbar("Error", 'Failed to generate image.',
-            backgroundColor: Colors.red);
+        Get.snackbar("Error!", 'Failed to generate image.',
+            colorText: Colors.white, backgroundColor: Colors.red);
       }
     }
   }
@@ -70,7 +70,9 @@ class _ImageGeneratorPageState extends State<ImageGeneratorPage> {
               color: Color(0xFFF2F5FA),
             ),
       child: Scaffold(
-        appBar: AppBar(),
+        appBar: AppBar(
+          title: Text("Image Generator"),
+        ),
         backgroundColor: Colors.transparent,
         body: SingleChildScrollView(
           child: Column(
@@ -82,15 +84,13 @@ class _ImageGeneratorPageState extends State<ImageGeneratorPage> {
                         color: Colors.black,
                         image: DecorationImage(
                             fit: BoxFit.cover,
-                            // image: MemoryImage(generatedImage!),
-
                             image: NetworkImage(generatedImage!)),
                       ),
                     )
                   : Container(
-                      height: size.height * .5,
+                      height: size.height / 1.7,
                       decoration: BoxDecoration(
-                        color: Colors.black,
+                        color: isDarkTheme ? Colors.black : Colors.white,
                       ),
                       child: Center(
                         child: AutoTypeText(
@@ -245,7 +245,7 @@ class _ImageGeneratorPageState extends State<ImageGeneratorPage> {
       ImageGallerySaver.saveFile(file.path, name: Utils().appName);
 
       Get.snackbar("Saved", "Image Saved Successfully",
-          backgroundColor: Colors.green);
+          colorText: Colors.white, backgroundColor: Colors.green);
     } catch (e) {
       log(e.toString());
     }
@@ -256,7 +256,7 @@ class _ImageGeneratorPageState extends State<ImageGeneratorPage> {
       // Ensure generatedImage is not null or empty
       if (generatedImage == null || generatedImage!.isEmpty) {
         Get.snackbar("Error", "Image URL is invalid or empty.",
-            backgroundColor: Colors.red);
+            colorText: Colors.white, backgroundColor: Colors.red);
         return;
       }
 
@@ -264,7 +264,7 @@ class _ImageGeneratorPageState extends State<ImageGeneratorPage> {
       final response = await get(Uri.parse(generatedImage!));
       if (response.statusCode != 200) {
         Get.snackbar("Error", "Failed to download image.",
-            backgroundColor: Colors.red);
+            colorText: Colors.white, backgroundColor: Colors.red);
         return;
       }
 
@@ -279,7 +279,7 @@ class _ImageGeneratorPageState extends State<ImageGeneratorPage> {
     } catch (e) {
       log(e.toString());
       Get.snackbar("Error", "An error occurred while sharing the image.",
-          backgroundColor: Colors.red);
+          colorText: Colors.white, backgroundColor: Colors.red);
     }
   }
 }

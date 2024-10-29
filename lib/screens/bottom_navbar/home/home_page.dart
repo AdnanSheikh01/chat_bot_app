@@ -1,13 +1,24 @@
+import 'package:chat_bot_app/controller/user_controller.dart';
 import 'package:chat_bot_app/screens/bottom_navbar/dummy_chat.dart';
 import 'package:chat_bot_app/screens/bottom_navbar/home/audio.dart';
+import 'package:chat_bot_app/screens/bottom_navbar/home/code_gen.dart';
 import 'package:chat_bot_app/screens/bottom_navbar/home/image_gen.dart';
 import 'package:chat_bot_app/screens/bottom_navbar/home/language_trans.dart';
 import 'package:chat_bot_app/screens/bottom_navbar/home/lens.dart';
+import 'package:chat_bot_app/widgets/auto_type_text.dart';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final UserController userController = Get.find();
 
   @override
   Widget build(BuildContext context) {
@@ -18,166 +29,93 @@ class HomePage extends StatelessWidget {
         Icon(Icons.edit),
         Colors.blue,
         "Content",
-        // NewChatPage(
-        //   appTitle: "Content",
-        // ),
-        ChatScreenDum()
+        ChatScreenDum(),
+        "Explore a variety of content tailored just for you."
       ],
       [
         Icon(Icons.photo),
         Colors.yellow,
-        "Image",
+        "Image Generator",
         ImageGeneratorPage(),
+        "Create stunning visuals instantly with our image generation tool."
       ],
       [
         Icon(Icons.headphones),
         Colors.green,
-        "Audio",
+        "Audio Hearer",
         AudioPage(),
+        "Enhance your listening experience with advanced audio playback."
       ],
       [
         Icon(Icons.lightbulb_outline),
         Colors.red,
-        "Lens",
+        "Google lens",
         LensPage(),
+        "Discover insights from the world around you using Google Lens."
+      ],
+      [
+        Icon(Icons.code),
+        Colors.brown,
+        "Code Generator",
+        CodeGenerator(),
+        "Generate efficient code snippets effortlessly for your projects."
       ],
       [
         Icon(Icons.language),
         Colors.deepPurple,
-        "Language",
+        "Language Translator",
         LanguageTranslationPage(),
+        "Break language barriers with instant translations."
       ],
     ];
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+    return SafeArea(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: MediaQuery.of(context).size.height * .01),
-              Center(
-                child: GestureDetector(
-                  onTap: () => Scaffold.of(context).openDrawer(),
-                  child: Container(
-                    height: 100,
-                    width: 100,
-                    decoration: BoxDecoration(
-                      color: Colors.blueGrey,
-                      borderRadius: BorderRadius.circular(50),
-                      image: DecorationImage(
-                        image: AssetImage("assets/images/person.png"),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+              SizedBox(height: MediaQuery.of(context).size.height * .02),
               SizedBox(height: 10),
-              Center(
-                child: Text(
-                  textAlign: TextAlign.center,
-                  "Welcome to \nAI Chat",
-                  style: TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
-                      color: isDarkTheme ? Colors.white : Colors.black),
-                ),
-              ),
-              SizedBox(height: 10),
-              SearchBar(
-                backgroundColor: WidgetStatePropertyAll(
-                    isDarkTheme ? Colors.black : Colors.white),
-                padding: WidgetStatePropertyAll(
-                  EdgeInsets.symmetric(horizontal: 10),
-                ),
-                hintText: "Ask me Anything...",
-                hintStyle: WidgetStatePropertyAll(
-                  TextStyle(color: Colors.grey),
-                ),
-                trailing: [
-                  IconButton(
-                    onPressed: () {},
-                    icon: Icon(
-                      Icons.photo,
-                      color: isDarkTheme ? Colors.white : Colors.black,
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () {},
-                    icon: Icon(
-                      Icons.mic,
-                      color: isDarkTheme ? Colors.white : Colors.black,
-                    ),
-                  )
-                ],
-                elevation: WidgetStatePropertyAll(1),
-              ),
-              SizedBox(height: 20),
-              SizedBox(
-                height: 60,
-                child: ListView.builder(
-                  itemCount: containerVal.length,
-                  scrollDirection: Axis.horizontal,
-                  itemBuilder: (context, index) => GestureDetector(
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => containerVal[index][3],
-                      ),
-                    ),
-                    child: Container(
-                      margin: EdgeInsets.only(right: 20),
-                      decoration: BoxDecoration(
-                        color: isDarkTheme ? Colors.black : Colors.white,
-                        borderRadius: BorderRadius.circular(40),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Row(
-                          children: [
-                            CircleAvatar(
-                              backgroundColor: containerVal[index][1],
-                              child: containerVal[index][0],
-                            ),
-                            SizedBox(width: 10),
-                            Text(
-                              containerVal[index][2],
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 16),
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(height: 30),
               Text(
-                "Recent",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                "Welcome to Bot Buddy,\n${userController.userFullName.value}",
+                style: TextStyle(
+                    fontSize: 25,
+                    fontWeight: FontWeight.bold,
+                    color: isDarkTheme ? Colors.white : Colors.black),
               ),
-              SizedBox(
-                height: MediaQuery.of(context).size.height,
-                child: GridView.builder(
-                  physics:
-                      NeverScrollableScrollPhysics(), // Disable scrolling for GridView
-                  itemCount: 10,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2),
-                  itemBuilder: (context, index) {
-                    return Container(
-                      margin: EdgeInsets.all(10),
-                      height: 100,
-                      width: 100,
-                      decoration: BoxDecoration(
-                        color: isDarkTheme ? Colors.black : Colors.white,
-                        borderRadius: BorderRadius.circular(10),
+              SizedBox(height: 10),
+              Expanded(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: containerVal.length,
+                  itemBuilder: (context, index) => Card(
+                    shadowColor: isDarkTheme ? Colors.blue : Colors.black,
+                    margin: EdgeInsets.only(bottom: 15),
+                    child: ListTile(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => containerVal[index][3],
+                          ),
+                        );
+                      },
+                      leading: CircleAvatar(
+                        backgroundColor: containerVal[index][1],
+                        child: containerVal[index][0],
                       ),
-                    );
-                  },
+                      title: Text(
+                        containerVal[index][2],
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 18),
+                      ),
+                      subtitle: Text(containerVal[index][4]),
+                      trailing: Icon(Icons.arrow_forward_ios),
+                    ),
+                  ),
                 ),
               ),
             ],
