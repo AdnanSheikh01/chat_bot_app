@@ -5,7 +5,6 @@ import 'package:chat_bot_app/screens/bottom_navbar/home/code_gen.dart';
 import 'package:chat_bot_app/screens/bottom_navbar/home/image_gen.dart';
 import 'package:chat_bot_app/screens/bottom_navbar/home/language_trans.dart';
 import 'package:chat_bot_app/screens/bottom_navbar/home/lens.dart';
-import 'package:chat_bot_app/widgets/auto_type_text.dart';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
