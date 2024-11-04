@@ -1,4 +1,4 @@
-import 'package:chat_bot_app/controller/user_controller.dart';
+import 'package:chat_bot_app/dum_controller.dart';
 import 'package:chat_bot_app/providers/chat_provider.dart';
 import 'package:chat_bot_app/screens/bottom_navbar/dummy_chat.dart';
 import 'package:chat_bot_app/theme/provider.dart';
@@ -21,7 +21,6 @@ class BottomNavbarScreen extends StatefulWidget {
 }
 
 class _BottomNavbarScreenState extends State<BottomNavbarScreen> {
-  final UserController userController = Get.find();
   final List<Widget> _pages = [
     HomePage(),
     // ChatPage(),
@@ -32,6 +31,7 @@ class _BottomNavbarScreenState extends State<BottomNavbarScreen> {
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
+    final UserController userController = Get.find();
 
     bool isDarkTheme = Theme.of(context).brightness == Brightness.dark;
 
@@ -69,16 +69,20 @@ class _BottomNavbarScreenState extends State<BottomNavbarScreen> {
                       ),
                     ),
                     SizedBox(height: 15),
-                    Text(
-                      userController.userFullName.value,
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                    Obx(
+                      () => Text(
+                        '${userController.fullName}',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 18),
+                      ),
                     ),
                     SizedBox(height: 5),
-                    Text(
-                      userController.userEmail.value,
-                      style:
-                          TextStyle(fontSize: 18, color: Colors.grey.shade700),
+                    Obx(
+                      () => Text(
+                        '${userController.email}',
+                        style: TextStyle(
+                            fontSize: 15, color: Colors.grey.shade700),
+                      ),
                     ),
                     SizedBox(height: 20),
                     ListTile(

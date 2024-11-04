@@ -1,4 +1,5 @@
 import 'package:camera/camera.dart';
+import 'package:chat_bot_app/dum_controller.dart';
 import 'package:chat_bot_app/firebase_options.dart';
 import 'package:chat_bot_app/providers/chat_provider.dart';
 import 'package:chat_bot_app/theme/provider.dart';
@@ -17,6 +18,8 @@ Future<void> main() async {
   cameras = await availableCameras();
   await ChatProvider.initHive();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  Get.put(UserController()); // Initialize the controller here
+
   runApp(
     MultiProvider(
       providers: [

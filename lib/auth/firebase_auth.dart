@@ -2,15 +2,13 @@
 
 import 'dart:developer';
 
-import 'package:chat_bot_app/controller/user_controller.dart';
+import 'package:chat_bot_app/dum_controller.dart';
 import 'package:chat_bot_app/screens/bottom_navbar/bottom_navbar.dart';
 import 'package:chat_bot_app/screens/sign_up/confirm_email.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-final UserController userController = Get.put(UserController());
 
 class FirebaseAuthServices {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -132,9 +130,10 @@ class FirebaseAuthServices {
       if (userDoc.exists) {
         String fullName = userDoc.get('fullName');
         log('User full name: $fullName');
+
+        Get.find<UserController>().setUser(fullName, email);
         Navigator.pop(context);
 
-        userController.setUserDetails(fullName, email);
         FirebaseAuth.instance.currentUser!.emailVerified
             ? Navigator.pushAndRemoveUntil(
                 context,
