@@ -57,10 +57,9 @@ class _BottomNavbarScreenState extends State<BottomNavbarScreen> {
               backgroundColor:
                   isDarkTheme ? Colors.black : Colors.white.withOpacity(.9),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.all(20),
                 child: Column(
                   children: [
-                    SizedBox(height: MediaQuery.of(context).size.height * .1),
                     CircleAvatar(
                       radius: 50,
                       child: Text(
@@ -205,7 +204,6 @@ class _BottomNavbarScreenState extends State<BottomNavbarScreen> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 30),
                   ],
                 ),
               ),

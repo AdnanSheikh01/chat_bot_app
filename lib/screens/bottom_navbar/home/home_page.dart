@@ -91,42 +91,53 @@ class _HomePageState extends State<HomePage> {
               Expanded(
                 child: GridView.builder(
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2),
+                      childAspectRatio: 0.8, crossAxisCount: 2),
                   shrinkWrap: true,
                   itemCount: containerVal.length,
                   itemBuilder: (context, index) => Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Card(
-                      shadowColor: isDarkTheme ? Colors.blue : Colors.black,
-                      margin: EdgeInsets.only(bottom: 15),
-                      child: Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            CircleAvatar(
-                              backgroundColor: containerVal[index][1],
-                              child: containerVal[index][0],
-                            ),
-                            SizedBox(height: 5),
-                            Text(
-                              containerVal[index][2],
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 16),
-                            ),
-                            Divider(
-                              color: isDarkTheme
-                                  ? Colors.grey.shade700
-                                  : Colors.grey.shade300,
-                            ),
+                    child: GestureDetector(
+                      onTap: () => Get.to(containerVal[index][3]),
+                      child: Card(
+                        shadowColor: isDarkTheme ? Colors.blue : Colors.black,
+                        margin: EdgeInsets.only(bottom: 20),
+                        child: Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              CircleAvatar(
+                                backgroundColor: containerVal[index][1],
+                                child: containerVal[index][0],
+                              ),
+                              SizedBox(height: 5),
+                              Flexible(
+                                child: Text(
+                                  containerVal[index][2],
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16),
+                                ),
+                              ),
+                              Divider(
+                                color: isDarkTheme
+                                    ? Colors.grey.shade700
+                                    : Colors.grey.shade300,
+                              ),
 
-                            Text(containerVal[index][4],
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 12)),
-                            // trailing: Icon(Icons.arrow_forward_ios),
-                            // ),
-                          ],
+                              Text(containerVal[index][4],
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      color: isDarkTheme
+                                          ? Colors.grey.shade700
+                                          : Colors.grey.shade900,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12)),
+                              // trailing: Icon(Icons.arrow_forward_ios),
+                              // ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
