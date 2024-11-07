@@ -1,8 +1,3 @@
-// ignore_for_file: use_build_context_synchronously
-
-import 'dart:developer';
-
-import 'package:chat_bot_app/dum_controller.dart';
 import 'package:chat_bot_app/screens/bottom_navbar/bottom_navbar.dart';
 import 'package:chat_bot_app/screens/sign_up/confirm_email.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -50,36 +45,37 @@ class FirebaseAuthServices {
         'email': email,
       });
 
-      Navigator.pop(context);
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ConfirmEmailScreen(),
-        ),
+      Get.back();
+      Get.to(
+        () => ConfirmEmailScreen(),
       );
     } on FirebaseAuthException catch (e) {
+      Get.snackbar(
+        "Error!",
+        e.code,
+      );
       if (e.code == 'invalid-credential') {
         // Display an error message to the user
-        Navigator.pop(context);
+        Get.back();
         Get.snackbar(
             backgroundColor: Colors.red,
             colorText: Colors.white,
             "Error!",
             "The supplied auth credential is malformed or has expired.");
       } else if (e.code == 'email-already-in-use') {
-        Navigator.pop(context);
+        Get.back();
         Get.snackbar(
             backgroundColor: Colors.red,
             colorText: Colors.white,
             "Error!",
             "User Already exists for that email.");
       } else if (e.code == 'weak-password') {
-        Navigator.pop(context);
+        Get.back();
 
         Get.snackbar(colorText: Colors.white, "Info!", "Weak Password.");
       } else {
         // Handle other Firebase sign-in errors if necessary
-        Navigator.pop(context);
+        Get.back();
         Get.snackbar(
             backgroundColor: Colors.red,
             colorText: Colors.white,
@@ -90,7 +86,7 @@ class FirebaseAuthServices {
     return null;
   }
 
-  Future<User?> signInWithEmail(
+  Future<String?> signInWithEmail(
       BuildContext context, String email, String password) async {
     try {
       showDialog(
@@ -118,58 +114,34 @@ class FirebaseAuthServices {
         ),
       );
       // Sign in using Firebase Authentication
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-          email: email, password: password);
+      await _auth.signInWithEmailAndPassword(email: email, password: password);
 
-      // Retrieve the full name from Firestore
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userCredential.user?.uid)
-          .get();
-
-      if (userDoc.exists) {
-        String fullName = userDoc.get('fullName');
-        log('User full name: $fullName');
-
-        Get.find<UserController>().setUser(fullName, email);
-        Navigator.pop(context);
-
-        FirebaseAuth.instance.currentUser!.emailVerified
-            ? Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const BottomNavbarScreen()),
-                (route) => false,
-              )
-            : Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ConfirmEmailScreen(),
-                ),
-              );
-
-        // You can now pass this full name to the home page
-      } else {
-        log('User document not found');
-      }
+      FirebaseAuth.instance.currentUser!.emailVerified
+          ? Get.offUntil(
+              GetPageRoute(page: () => const BottomNavbarScreen()),
+              (route) => false,
+            )
+          : Get.to(
+              () => ConfirmEmailScreen(),
+            );
     } on FirebaseAuthException catch (e) {
       if (e.code == 'email-already-in-use') {
         // Show an error message to the user
-        Navigator.pop(context);
+        Get.back();
         Get.snackbar(
             backgroundColor: Colors.red,
             colorText: Colors.white,
             "Error!",
             "The email address is already in use by another account.");
       } else if (e.code == 'invalid-email') {
-        Navigator.pop(context);
+        Get.back();
         Get.snackbar(
             backgroundColor: Colors.red,
             colorText: Colors.white,
             "Error!",
             "Invalid User.");
       } else if (e.code == 'wrong-password') {
-        Navigator.pop(context);
+        Get.back();
 
         Get.snackbar(
             backgroundColor: Colors.red,
@@ -177,7 +149,7 @@ class FirebaseAuthServices {
             "Error!",
             "Wrong Password.");
       } else if (e.code == 'invalid-credential') {
-        Navigator.pop(context);
+        Get.back();
 
         Get.snackbar(
             backgroundColor: Colors.red,
@@ -186,7 +158,7 @@ class FirebaseAuthServices {
             "No user found for that email.");
       } else {
         // Handle other errors if necessary
-        Navigator.pop(context);
+        Get.back();
         Get.snackbar(
             backgroundColor: Colors.red,
             colorText: Colors.white,
@@ -195,5 +167,11 @@ class FirebaseAuthServices {
       }
     }
     return null;
+  }
+
+  Future<Map<String, dynamic>?> getUserData(String uid) async {
+    DocumentSnapshot userDoc =
+        await FirebaseFirestore.instance.collection('users').doc(uid).get();
+    return userDoc.exists ? userDoc.data() as Map<String, dynamic> : null;
   }
 }

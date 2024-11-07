@@ -31,17 +31,11 @@ class _SavedPageState extends State<SavedPage> {
           backgroundColor: Colors.transparent,
           appBar: AppBar(
             backgroundColor: Colors.transparent,
-            centerTitle: false,
+            centerTitle: true,
             title: Text(
               "Chat History",
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
             ),
-            actions: [
-              Padding(
-                padding: const EdgeInsets.only(right: 10),
-                child: IconButton(onPressed: () {}, icon: CircleAvatar()),
-              )
-            ],
           ),
           body: SingleChildScrollView(
             child: Padding(

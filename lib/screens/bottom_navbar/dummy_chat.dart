@@ -114,54 +114,56 @@ class _ChatScreenDumState extends State<ChatScreenDum> {
                 ),
           child: Scaffold(
             appBar: AppBar(
-              title: Text("Content"),
+              title: Text("Chats"),
               actions: [
                 if (chatprovider.inchatMessage.isNotEmpty)
-                  ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            isDarkTheme ? Colors.white : Colors.black,
-                        foregroundColor:
-                            isDarkTheme ? Colors.black : Colors.white),
-                    onPressed: () async {
-                      showDialog(
-                        context: context,
-                        barrierDismissible: false,
-                        builder: (context) => AlertDialog(
-                          title: Text("Start New Chat"),
-                          content: Text(
-                              "Are you sure you want to start a new chat?"),
-                          actions: [
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                              child: Text(
-                                "Cancel",
-                                style: TextStyle(fontWeight: FontWeight.bold),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 5),
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              isDarkTheme ? Colors.grey.shade900 : Colors.black,
+                          foregroundColor: Colors.white),
+                      onPressed: () async {
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) => AlertDialog(
+                            title: Text("Start New Chat"),
+                            content: Text(
+                                "Are you sure you want to start a new chat?"),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                child: Text(
+                                  "Cancel",
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
                               ),
-                            ),
-                            TextButton(
-                              onPressed: () async {
-                                await chatprovider.prepareChatRoom(
-                                    isNewChat: true, chatID: "");
-                                Navigator.pop(context);
-                                Get.snackbar("Success",
-                                    "New Chat Generated Successfully",
-                                    backgroundColor: Colors.green,
-                                    colorText: Colors.white);
-                              },
-                              child: Text(
-                                "Yes",
-                                style: TextStyle(fontWeight: FontWeight.bold),
+                              TextButton(
+                                onPressed: () async {
+                                  await chatprovider.prepareChatRoom(
+                                      isNewChat: true, chatID: "");
+                                  Navigator.pop(context);
+                                  Get.snackbar("Success",
+                                      "New Chat Generated Successfully",
+                                      backgroundColor: Colors.green,
+                                      colorText: Colors.white);
+                                },
+                                child: Text(
+                                  "Yes",
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                    label: Text("New Chat"),
-                    icon: Icon(Icons.add),
+                            ],
+                          ),
+                        );
+                      },
+                      label: Text("New Chat"),
+                      icon: Icon(Icons.add),
+                    ),
                   )
               ],
             ),
@@ -175,7 +177,7 @@ class _ChatScreenDumState extends State<ChatScreenDum> {
                       child: chatprovider.inchatMessage.isEmpty
                           ? Center(
                               child: AutoTypeText(
-                                text: "Let's Explore Chats",
+                                text: "Let's Start a Conversation",
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 20,

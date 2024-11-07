@@ -1,4 +1,4 @@
-import 'package:chat_bot_app/dum_controller.dart';
+import 'package:chat_bot_app/auth/firebase_auth.dart';
 import 'package:chat_bot_app/providers/chat_provider.dart';
 import 'package:chat_bot_app/screens/bottom_navbar/dummy_chat.dart';
 import 'package:chat_bot_app/theme/provider.dart';
@@ -21,6 +21,26 @@ class BottomNavbarScreen extends StatefulWidget {
 }
 
 class _BottomNavbarScreenState extends State<BottomNavbarScreen> {
+  String fullName = '';
+  String email = '';
+  @override
+  void initState() {
+    _fetchUserData();
+    super.initState();
+  }
+
+  Future<void> _fetchUserData() async {
+    String uid = FirebaseAuth.instance.currentUser!.uid;
+    var userData = await FirebaseAuthServices().getUserData(uid);
+
+    if (userData != null) {
+      setState(() {
+        fullName = userData['fullName'];
+        email = userData['email'];
+      });
+    }
+  }
+
   final List<Widget> _pages = [
     HomePage(),
     // ChatPage(),
@@ -31,7 +51,6 @@ class _BottomNavbarScreenState extends State<BottomNavbarScreen> {
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
-    final UserController userController = Get.find();
 
     bool isDarkTheme = Theme.of(context).brightness == Brightness.dark;
 
@@ -57,53 +76,43 @@ class _BottomNavbarScreenState extends State<BottomNavbarScreen> {
               backgroundColor:
                   isDarkTheme ? Colors.black : Colors.white.withOpacity(.9),
               child: Padding(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.only(bottom: 30),
                 child: Column(
                   children: [
-                    CircleAvatar(
-                      radius: 50,
-                      child: Text(
-                        "F",
-                        style: TextStyle(fontSize: 30),
+                    UserAccountsDrawerHeader(
+                      decoration: BoxDecoration(
+                        color: isDarkTheme
+                            ? Colors.grey.shade900
+                            : Colors.indigo.shade700,
                       ),
-                    ),
-                    SizedBox(height: 15),
-                    Obx(
-                      () => Text(
-                        '${userController.fullName}',
+                      accountName: Text(
+                        fullName,
                         style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 18),
+                          fontWeight: FontWeight.bold,
+                          color: isDarkTheme ? Colors.white : Colors.white,
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 5),
-                    Obx(
-                      () => Text(
-                        '${userController.email}',
+                      accountEmail: Text(
+                        email,
                         style: TextStyle(
-                            fontSize: 15, color: Colors.grey.shade700),
+                          color: Colors.grey.shade300,
+                        ),
+                      ),
+                      currentAccountPicture: CircleAvatar(
+                        backgroundColor: Colors.grey.shade200,
+                        child: Text(
+                          fullName.isNotEmpty ? fullName[0].toUpperCase() : '',
+                          style: TextStyle(fontSize: 24, color: Colors.indigo),
+                        ),
                       ),
                     ),
                     SizedBox(height: 20),
-                    ListTile(
-                      leading: Icon(Icons.settings_outlined),
-                      title: Text("Settings"),
-                    ),
-                    Divider(color: Colors.grey.shade300),
-                    ListTile(
-                      leading: Icon(Icons.support_agent_outlined),
-                      title: Text("Help Centre"),
-                    ),
-                    Divider(color: Colors.grey.shade300),
-                    ListTile(
-                      leading: Icon(Icons.feedback_outlined),
-                      title: Text("Send Us Feedback"),
-                    ),
-                    Divider(color: Colors.grey.shade300),
-                    ListTile(
-                      leading: Icon(Icons.star_rounded),
-                      title: Text("Rate our App"),
-                    ),
-                    Divider(color: Colors.grey.shade300),
+                    _buildDrawerItem(Icons.settings_outlined, "Settings"),
+                    _buildDrawerItem(
+                        Icons.support_agent_outlined, "Help Centre"),
+                    _buildDrawerItem(
+                        Icons.feedback_outlined, "Send Us Feedback"),
+                    _buildDrawerItem(Icons.star_rounded, "Rate our App"),
                     ListTile(
                       onTap: () {
                         FirebaseAuth.instance.signOut();
@@ -245,5 +254,17 @@ class _BottomNavbarScreenState extends State<BottomNavbarScreen> {
         ),
       );
     });
+  }
+
+  Widget _buildDrawerItem(IconData icon, String title) {
+    return Column(
+      children: [
+        ListTile(
+          leading: Icon(icon),
+          title: Text(title),
+        ),
+        Divider(color: Colors.grey.shade300),
+      ],
+    );
   }
 }
