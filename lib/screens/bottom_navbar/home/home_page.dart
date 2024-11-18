@@ -1,16 +1,15 @@
-import 'package:chat_bot_app/screens/bottom_navbar/dummy_chat.dart';
+import 'package:chat_bot_app/screens/bottom_navbar/chat/chat.dart';
 import 'package:chat_bot_app/screens/bottom_navbar/home/audio.dart';
 import 'package:chat_bot_app/screens/bottom_navbar/home/code_gen.dart';
+import 'package:chat_bot_app/screens/bottom_navbar/home/dum_lens.dart';
 import 'package:chat_bot_app/screens/bottom_navbar/home/image_gen.dart';
 import 'package:chat_bot_app/screens/bottom_navbar/home/language_trans.dart';
-import 'package:chat_bot_app/screens/bottom_navbar/home/lens.dart';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
-
   @override
   State<HomePage> createState() => _HomePageState();
 }
@@ -53,7 +52,7 @@ class _HomePageState extends State<HomePage> {
         Icon(Icons.code, size: 30, color: Colors.white),
         Colors.brown,
         "Code Generator",
-        CodeGenerator(),
+        CodeGeneratorPage(),
         "Generate efficient code snippets effortlessly for your projects."
       ],
       [
@@ -68,34 +67,59 @@ class _HomePageState extends State<HomePage> {
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Bot Buddy",
-                style: TextStyle(
-                    fontSize: 30,
-                    fontWeight: FontWeight.bold,
-                    color: isDarkTheme ? Colors.white : Colors.black),
-              ),
-              SizedBox(height: 4),
-              Text(
-                "Your Personal AI Assistant",
-                style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w300,
-                    color: isDarkTheme
-                        ? Colors.grey.shade400
-                        : Colors.grey.shade700),
-              ),
-              SizedBox(height: 20),
-              Expanded(
-                child: GridView.builder(
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Bot Buddy",
+                          style: TextStyle(
+                              fontSize: 30,
+                              fontWeight: FontWeight.bold,
+                              color: isDarkTheme ? Colors.white : Colors.black),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          "Your Personal AI Assistant",
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w300,
+                              color: isDarkTheme
+                                  ? Colors.grey.shade400
+                                  : Colors.grey.shade700),
+                        ),
+                      ],
+                    ),
+                    GestureDetector(
+                      onTap: () => Scaffold.of(context).openDrawer(),
+                      child: CircleAvatar(
+                        radius: 25,
+                        backgroundColor:
+                            isDarkTheme ? Colors.white : Colors.black,
+                        child: Icon(
+                          Icons.person,
+                          size: 30,
+                          color: isDarkTheme ? Colors.black : Colors.white,
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+                SizedBox(height: 20),
+                GridView.builder(
+                  physics: NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
-                    childAspectRatio: 0.9,
+                    childAspectRatio: 0.8,
                     mainAxisSpacing: 15,
                     crossAxisSpacing: 15,
                   ),
@@ -147,8 +171,8 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

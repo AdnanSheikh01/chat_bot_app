@@ -3,14 +3,14 @@ import 'dart:io';
 
 // import 'dart:typed_data';
 import 'package:chat_bot_app/auth/du.dart';
-import 'package:chat_bot_app/utils/my_data.dart';
 import 'package:chat_bot_app/widgets/auto_type_text.dart';
 import 'package:flutter/material.dart';
 
 // import 'package:chat_bot_app/auth/text_to_image_services.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart';
-import 'package:image_gallery_saver/image_gallery_saver.dart';
+
+// import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -242,7 +242,7 @@ class _ImageGeneratorPageState extends State<ImageGeneratorPage> {
       final dir = await getTemporaryDirectory();
       final file = File('${dir.path}/image.png');
       file.writeAsBytes(bytes);
-      ImageGallerySaver.saveFile(file.path, name: Utils().appName);
+      // ImageGallerySaver.saveFile(file.path, name: Utils().appName);
 
       Get.snackbar("Saved", "Image Saved Successfully",
           colorText: Colors.white, backgroundColor: Colors.green);

@@ -1,4 +1,5 @@
 {
     "java.configuration.updateBuildConfiguration": "automatic",
-    "java.search.scope": "all"
+    "java.search.scope": "all",
+    "java.compile.nullAnalysis.mode": "automatic"
 }

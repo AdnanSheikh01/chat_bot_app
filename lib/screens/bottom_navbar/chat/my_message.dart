@@ -34,9 +34,8 @@ class MyMessageWidget extends StatelessWidget {
         child: data.imageUrls.isNotEmpty
             ? SizedBox(
                 height: 100,
-                width: size.width * .3,
+                width: size.width * .5,
                 child: Stack(
-                  // crossAxisAlignment: CrossAxisAlignment.end,s
                   children: [
                     SizedBox(
                       height: 80,

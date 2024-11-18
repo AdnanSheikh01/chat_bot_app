@@ -1,7 +1,7 @@
 import 'package:chat_bot_app/models/message.dart';
 import 'package:chat_bot_app/providers/chat_provider.dart';
-import 'package:chat_bot_app/screens/bottom_navbar/assistant_message.dart';
-import 'package:chat_bot_app/screens/bottom_navbar/my_message.dart';
+import 'package:chat_bot_app/screens/bottom_navbar/chat/assistant_message.dart';
+import 'package:chat_bot_app/screens/bottom_navbar/chat/my_message.dart';
 import 'package:chat_bot_app/widgets/auto_type_text.dart';
 import 'package:chat_bot_app/widgets/preview_image.dart';
 import 'package:flutter/material.dart';
@@ -114,6 +114,7 @@ class _ChatScreenDumState extends State<ChatScreenDum> {
                 ),
           child: Scaffold(
             appBar: AppBar(
+              centerTitle: true,
               title: Text("Chats"),
               actions: [
                 if (chatprovider.inchatMessage.isNotEmpty)
@@ -146,7 +147,7 @@ class _ChatScreenDumState extends State<ChatScreenDum> {
                                 onPressed: () async {
                                   await chatprovider.prepareChatRoom(
                                       isNewChat: true, chatID: "");
-                                  Navigator.pop(context);
+                                  Get.back();
                                   Get.snackbar("Success",
                                       "New Chat Generated Successfully",
                                       backgroundColor: Colors.green,

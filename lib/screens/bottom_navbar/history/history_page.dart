@@ -101,7 +101,7 @@ class _SavedPageState extends State<SavedPage> {
                                                   .deletChatMessage(
                                                       chatID: chat.uid);
                                               await chat.delete();
-                                              Navigator.pop(context);
+                                              Get.back();
                                               Get.snackbar("Success",
                                                   "Chat Deleted Successfully",
                                                   backgroundColor: Colors.green,
