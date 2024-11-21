@@ -9,14 +9,14 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
-class ChatScreenDum extends StatefulWidget {
-  const ChatScreenDum({super.key});
+class ChatScreen extends StatefulWidget {
+  const ChatScreen({super.key});
 
   @override
-  State<ChatScreenDum> createState() => _ChatScreenDumState();
+  State<ChatScreen> createState() => _ChatScreenState();
 }
 
-class _ChatScreenDumState extends State<ChatScreenDum> {
+class _ChatScreenState extends State<ChatScreen> {
   String _message = "";
   final _mesController = TextEditingController();
   final _scrollController = ScrollController();

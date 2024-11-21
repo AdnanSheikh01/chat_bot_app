@@ -44,7 +44,7 @@ class _BottomNavbarScreenState extends State<BottomNavbarScreen> {
   final List<Widget> _pages = [
     HomePage(),
     // ChatPage(),
-    ChatScreenDum(),
+    ChatScreen(),
     SavedPage(),
   ];
 

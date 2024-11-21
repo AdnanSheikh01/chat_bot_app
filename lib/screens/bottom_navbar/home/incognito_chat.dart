@@ -6,21 +6,21 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 
 import '../../../utils/my_data.dart';
 
-class NewChatPage extends StatefulWidget {
-  const NewChatPage({super.key, required this.appTitle});
-  final String appTitle;
+class IncognitoChat extends StatefulWidget {
+  const IncognitoChat({super.key});
 
   @override
-  State<NewChatPage> createState() => _NewChatPageState();
+  State<IncognitoChat> createState() => _IncognitoChatState();
 }
 
-class _NewChatPageState extends State<NewChatPage> {
+class _IncognitoChatState extends State<IncognitoChat> {
   ChatUser myUser = ChatUser(id: '1', firstName: 'Me');
   ChatUser geminiUser = ChatUser(id: '2', firstName: 'Bot Buddy');
 
   List<ChatMessage> messages = [];
 
   List<ChatUser> typing = [];
+
   getData(ChatMessage message) async {
     typing.add(geminiUser);
     messages.insert(0, message);
@@ -42,6 +42,11 @@ class _NewChatPageState extends State<NewChatPage> {
 
   @override
   void initState() {
+    intro();
+    super.initState();
+  }
+
+  Future<void> intro() async {
     Future.delayed(Duration(seconds: 5), () {
       setState(() {
         messages.add(
@@ -53,7 +58,12 @@ class _NewChatPageState extends State<NewChatPage> {
         );
       });
     });
-    super.initState();
+  }
+
+  @override
+  void dispose() {
+    intro();
+    super.dispose();
   }
 
   @override
@@ -74,9 +84,9 @@ class _NewChatPageState extends State<NewChatPage> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          centerTitle: false,
+          centerTitle: true,
           title: Text(
-            widget.appTitle,
+            "Incognito Chat",
             style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: Theme.of(context).colorScheme.primary,

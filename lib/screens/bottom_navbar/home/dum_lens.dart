@@ -31,6 +31,7 @@ class _LensPageState extends State<LensPage> {
 
   Future<void> analyzeImage(XFile file) async {
     final inputImage = InputImage.fromFilePath(file.path);
+    // ignore: deprecated_member_use
     final textRecognizer = GoogleMlKit.vision.textRecognizer();
     final RecognizedText recognized =
         await textRecognizer.processImage(inputImage);

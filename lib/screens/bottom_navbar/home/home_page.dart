@@ -1,8 +1,8 @@
-import 'package:chat_bot_app/screens/bottom_navbar/chat/chat.dart';
 import 'package:chat_bot_app/screens/bottom_navbar/home/audio.dart';
 import 'package:chat_bot_app/screens/bottom_navbar/home/code_gen.dart';
 import 'package:chat_bot_app/screens/bottom_navbar/home/dum_lens.dart';
 import 'package:chat_bot_app/screens/bottom_navbar/home/image_gen.dart';
+import 'package:chat_bot_app/screens/bottom_navbar/home/incognito_chat.dart';
 import 'package:chat_bot_app/screens/bottom_navbar/home/language_trans.dart';
 
 import 'package:flutter/material.dart';
@@ -24,7 +24,7 @@ class _HomePageState extends State<HomePage> {
         Icon(Icons.edit, size: 30, color: Colors.white),
         Colors.blue,
         "Incognito Content",
-        ChatScreenDum(),
+        IncognitoChat(),
         "Explore a variety of content tailored just for you."
       ],
       [
