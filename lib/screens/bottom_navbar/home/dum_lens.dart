@@ -1,7 +1,12 @@
 import 'dart:io';
 
+import 'package:chat_bot_app/language.dart';
+import 'package:chat_bot_app/utils/my_data.dart';
 import 'package:chat_bot_app/widgets/auto_type_text.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:get/get.dart';
+import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:translator/translator.dart';
@@ -17,6 +22,9 @@ class _LensPageState extends State<LensPage> {
   XFile? imageFile;
   String recognizedText = '';
   final translator = GoogleTranslator();
+  bool isloading = false;
+
+  String selectedLanguage = languages[0].name;
 
   Future<void> pickImage(ImageSource imageSource) async {
     final picker = ImagePicker();
@@ -33,6 +41,7 @@ class _LensPageState extends State<LensPage> {
     final inputImage = InputImage.fromFilePath(file.path);
     // ignore: deprecated_member_use
     final textRecognizer = GoogleMlKit.vision.textRecognizer();
+
     final RecognizedText recognized =
         await textRecognizer.processImage(inputImage);
 
@@ -42,10 +51,48 @@ class _LensPageState extends State<LensPage> {
     textRecognizer.close();
   }
 
-  Future<void> translateText(String text, String targetLanguage) async {
-    final translation = await translator.translate(text, to: targetLanguage);
-    setState(() {
-      recognizedText = translation.text;
+  Future<void> _translateLanguages(String text) async {
+    if (recognizedText.isNotEmpty) {
+      final toLang = selectedLanguage;
+
+      setState(() {
+        isloading = true; // Show loading indicator
+      });
+
+      try {
+        final model =
+            GenerativeModel(model: 'gemini-1.5-flash', apiKey: Utils.apiKey);
+        final content = [
+          Content.text("Translate only the following text to $toLang: $text")
+        ];
+
+        final response = await model.generateContent(content);
+
+        setState(() {
+          if (response.text != null) {
+            recognizedText = response.text!;
+          } else {
+            recognizedText = "Translation failed. Please try again.";
+          }
+        });
+      } catch (e) {
+        Get.snackbar("Error", e.toString(),
+            colorText: Colors.white, backgroundColor: Colors.red);
+      } finally {
+        setState(() {
+          isloading = false;
+        });
+      }
+    } else {
+      Get.snackbar("Error", "No text to translate",
+          colorText: Colors.white, backgroundColor: Colors.red);
+    }
+  }
+
+  void _copyCodeToClipboard() {
+    Clipboard.setData(ClipboardData(text: recognizedText)).then((_) {
+      Get.snackbar("Success", 'Code copied to clipboard',
+          colorText: Colors.white, backgroundColor: Colors.green);
     });
   }
 
@@ -77,7 +124,6 @@ class _LensPageState extends State<LensPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Image Preview
                 if (imageFile != null)
                   ClipRRect(
                     borderRadius: BorderRadius.circular(20),
@@ -113,7 +159,6 @@ class _LensPageState extends State<LensPage> {
                     ),
                   ),
                 const SizedBox(height: 20),
-                // Recognized Text Section
                 if (recognizedText.isNotEmpty)
                   Card(
                     color: isDarkTheme
@@ -122,21 +167,30 @@ class _LensPageState extends State<LensPage> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15.0),
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(15.0),
-                      child: Text(
-                        recognizedText,
-                        style: TextStyle(
-                          color: isDarkTheme ? Colors.white : Colors.black,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        TextButton.icon(
+                          onPressed: _copyCodeToClipboard,
+                          label: Text("Copy Text"),
+                          icon: Icon(Icons.copy),
                         ),
-                        textAlign: TextAlign.center,
-                      ),
+                        Padding(
+                          padding: const EdgeInsets.all(15.0),
+                          child: Text(
+                            recognizedText,
+                            style: TextStyle(
+                              color: isDarkTheme ? Colors.white : Colors.black,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 const SizedBox(height: 20),
-                // Action Buttons
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
@@ -174,21 +228,63 @@ class _LensPageState extends State<LensPage> {
                     ),
                   ],
                 ),
+                isloading ? SizedBox.shrink() : const SizedBox(height: 20),
+                isloading
+                    ? SizedBox.shrink()
+                    : Container(
+                        decoration: BoxDecoration(
+                          color: isDarkTheme ? Colors.black : Colors.white,
+                          borderRadius:
+                              BorderRadius.circular(10), // Rounded corners
+                        ),
+                        padding: EdgeInsets.symmetric(horizontal: 10),
+                        child: DropdownButton<String>(
+                          value: selectedLanguage,
+                          items: languages
+                              .map((entry) => DropdownMenuItem<String>(
+                                    value: entry.name,
+                                    child: Text(entry.name),
+                                  ))
+                              .toList(),
+                          onChanged: (value) {
+                            if (value != null) {
+                              setState(() {
+                                selectedLanguage = value;
+                              });
+                            }
+                          },
+                          isExpanded: true,
+                          underline: SizedBox(),
+                          hint: Text(
+                            "Select Language",
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                          dropdownColor:
+                              isDarkTheme ? Colors.black : Colors.white,
+                        ),
+                      ),
                 const SizedBox(height: 20),
-                // Translate Button
-                ElevatedButton.icon(
-                  onPressed: () => translateText(recognizedText, 'es'),
-                  icon: Icon(Icons.translate),
-                  label: Text("Translate to Spanish"),
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    backgroundColor: Colors.purple.shade600,
-                    padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
+                isloading
+                    ? SizedBox(
+                        height: 50,
+                        child: Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                      )
+                    : ElevatedButton.icon(
+                        onPressed: () => _translateLanguages(recognizedText),
+                        icon: Icon(Icons.translate),
+                        label: Text("Translate to: $selectedLanguage"),
+                        style: ElevatedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          backgroundColor: Colors.purple.shade600,
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 30, vertical: 15),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
               ],
             ),
           ),

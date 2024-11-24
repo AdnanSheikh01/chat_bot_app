@@ -50,6 +50,7 @@ class FirebaseAuthServices {
         () => ConfirmEmailScreen(),
       );
     } on FirebaseAuthException catch (e) {
+      Get.back();
       Get.snackbar(
         "Error!",
         e.code,

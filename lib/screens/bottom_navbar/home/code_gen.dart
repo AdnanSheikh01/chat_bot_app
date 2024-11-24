@@ -1,12 +1,14 @@
 import 'dart:developer';
-import 'package:chat_bot_app/prog_language.dart';
-import 'package:chat_bot_app/utils/my_data.dart';
-import 'package:chat_bot_app/widgets/auto_type_text.dart';
+
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Import for Clipboard
+import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:get/get.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+
+import 'package:chat_bot_app/prog_language.dart';
+import 'package:chat_bot_app/utils/my_data.dart';
+import 'package:chat_bot_app/widgets/auto_type_text.dart';
 
 class CodeGeneratorPage extends StatefulWidget {
   const CodeGeneratorPage({super.key});
@@ -33,7 +35,6 @@ class _CodeGeneratorPageState extends State<CodeGeneratorPage> {
           "Give me Code only with boiler plate for $message in $lang without any expalanation.");
       final response = await model.generateContent([content]);
       setState(() {
-        // code = response.text ?? 'No code generated';
         code = response.text?.replaceAll(RegExp(r'```[a-zA-Z]*|```'), '') ??
             'No code generated';
       });

@@ -1,8 +1,9 @@
-import 'package:chat_bot_app/widgets/auto_type_text.dart';
 import 'package:dash_chat_2/dash_chat_2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+
+import 'package:chat_bot_app/widgets/auto_type_text.dart';
 
 import '../../../utils/my_data.dart';
 
@@ -18,8 +19,8 @@ class _IncognitoChatState extends State<IncognitoChat> {
   ChatUser geminiUser = ChatUser(id: '2', firstName: 'Bot Buddy');
 
   List<ChatMessage> messages = [];
-
   List<ChatUser> typing = [];
+  Future<void>? introFuture;
 
   getData(ChatMessage message) async {
     typing.add(geminiUser);
@@ -37,7 +38,7 @@ class _IncognitoChatState extends State<IncognitoChat> {
     messages.insert(0, m1);
 
     typing.remove(geminiUser);
-    setState(() {});
+    if (mounted) setState(() {});
   }
 
   @override
@@ -47,22 +48,24 @@ class _IncognitoChatState extends State<IncognitoChat> {
   }
 
   Future<void> intro() async {
-    Future.delayed(Duration(seconds: 5), () {
-      setState(() {
-        messages.add(
-          ChatMessage(
-            text: 'Hello! How can I help you today?',
-            user: geminiUser,
-            createdAt: DateTime.now(),
-          ),
-        );
-      });
+    introFuture = Future.delayed(Duration(seconds: 5), () {
+      if (mounted) {
+        setState(() {
+          messages.add(
+            ChatMessage(
+              text: 'Hello! How can I help you today?',
+              user: geminiUser,
+              createdAt: DateTime.now(),
+            ),
+          );
+        });
+      }
     });
   }
 
   @override
   void dispose() {
-    intro();
+    introFuture = null;
     super.dispose();
   }
 

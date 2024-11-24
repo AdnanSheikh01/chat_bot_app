@@ -1,4 +1,4 @@
-import 'package:chat_bot_app/screens/bottom_navbar/home/audio.dart';
+import 'package:chat_bot_app/screens/bottom_navbar/home/audio/audio.dart';
 import 'package:chat_bot_app/screens/bottom_navbar/home/code_gen.dart';
 import 'package:chat_bot_app/screens/bottom_navbar/home/dum_lens.dart';
 import 'package:chat_bot_app/screens/bottom_navbar/home/image_gen.dart';

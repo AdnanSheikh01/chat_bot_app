@@ -18,9 +18,7 @@ class MyMessageWidget extends StatelessWidget {
     return Align(
       alignment: Alignment.centerRight,
       child: Container(
-        constraints: data.imageUrls.isNotEmpty
-            ? BoxConstraints(maxWidth: size.width * .7)
-            : BoxConstraints(maxWidth: size.width * .7),
+        constraints: BoxConstraints(maxWidth: size.width * .7),
         decoration: BoxDecoration(
           color: data.imageUrls.isNotEmpty
               ? Colors.transparent
