@@ -103,12 +103,9 @@ class _HomePageState extends State<HomePage> {
                       child: CircleAvatar(
                         radius: 25,
                         backgroundColor:
-                            isDarkTheme ? Colors.white : Colors.black,
-                        child: Icon(
-                          Icons.person,
-                          size: 30,
-                          color: isDarkTheme ? Colors.black : Colors.white,
-                        ),
+                            isDarkTheme ? Colors.grey.shade900 : Colors.white,
+                        backgroundImage:
+                            AssetImage("assets/images/profile.png"),
                       ),
                     )
                   ],

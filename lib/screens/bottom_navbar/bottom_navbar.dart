@@ -98,15 +98,10 @@ class _BottomNavbarScreenState extends State<BottomNavbarScreen> {
                         ),
                       ),
                       currentAccountPicture: CircleAvatar(
-                        backgroundColor: Colors.grey.shade200,
-                        child: Text(
-                          fullName.isNotEmpty ? fullName[0].toUpperCase() : '',
-                          style: TextStyle(
-                              fontSize: 24,
-                              color: isDarkTheme
-                                  ? Colors.grey.shade900
-                                  : Colors.indigo),
-                        ),
+                        backgroundColor:
+                            isDarkTheme ? Colors.black : Colors.grey.shade200,
+                        backgroundImage:
+                            AssetImage("assets/images/profile.png"),
                       ),
                     ),
                     SizedBox(height: 20),
