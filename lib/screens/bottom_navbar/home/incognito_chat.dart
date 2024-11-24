@@ -90,10 +90,7 @@ class _IncognitoChatState extends State<IncognitoChat> {
           centerTitle: true,
           title: Text(
             "Incognito Chat",
-            style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.primary,
-                fontSize: 22),
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
           ),
         ),
         body: messages.isEmpty

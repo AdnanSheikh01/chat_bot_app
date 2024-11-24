@@ -6,7 +6,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:get/get.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
-import 'package:chat_bot_app/prog_language.dart';
+import 'package:chat_bot_app/widgets/prog_language.dart';
 import 'package:chat_bot_app/utils/my_data.dart';
 import 'package:chat_bot_app/widgets/auto_type_text.dart';
 
@@ -94,7 +94,11 @@ class _CodeGeneratorPageState extends State<CodeGeneratorPage> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: Text('Code Generator Page'),
+          centerTitle: true,
+          title: Text(
+            'Code Generator Page',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+          ),
         ),
         body: SingleChildScrollView(
           child: Padding(

@@ -115,7 +115,10 @@ class _LensPageState extends State<LensPage> {
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           elevation: 0,
-          title: Text("Google Lens"),
+          title: Text(
+            "Google Lens",
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+          ),
           centerTitle: true,
         ),
         body: SingleChildScrollView(

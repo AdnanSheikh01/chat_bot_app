@@ -71,7 +71,11 @@ class _ImageGeneratorPageState extends State<ImageGeneratorPage> {
             ),
       child: Scaffold(
         appBar: AppBar(
-          title: Text("Image Generator"),
+          centerTitle: true,
+          title: Text(
+            "Image Generator",
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+          ),
         ),
         backgroundColor: Colors.transparent,
         body: SingleChildScrollView(

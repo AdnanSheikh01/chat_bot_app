@@ -196,7 +196,10 @@ class _AudioPageState extends State<AudioPage> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: const Text("Audio Chat"),
+          title: const Text(
+            "Audio Chat",
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+          ),
           centerTitle: true,
         ),
         body: Padding(

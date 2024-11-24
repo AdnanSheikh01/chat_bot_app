@@ -115,7 +115,10 @@ class _ChatScreenState extends State<ChatScreen> {
           child: Scaffold(
             appBar: AppBar(
               centerTitle: true,
-              title: Text("Chats"),
+              title: Text(
+                "Chats",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+              ),
               actions: [
                 if (chatprovider.inchatMessage.isNotEmpty)
                   Padding(

@@ -155,7 +155,12 @@ class _LanguageTranslationPageState extends State<LanguageTranslationPage> {
           : const BoxDecoration(color: Color(0xFFF2F5FA)),
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        appBar: AppBar(title: const Text("Language Translator")),
+        appBar: AppBar(
+            centerTitle: true,
+            title: const Text(
+              "Language Translator",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+            )),
         body: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(20),
