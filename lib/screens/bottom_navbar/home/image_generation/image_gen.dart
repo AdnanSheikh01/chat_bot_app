@@ -2,7 +2,7 @@ import 'dart:developer';
 import 'dart:io';
 
 // import 'dart:typed_data';
-import 'package:chat_bot_app/auth/du.dart';
+import 'package:chat_bot_app/screens/bottom_navbar/home/image_generation/text_to_image.dart';
 import 'package:chat_bot_app/widgets/auto_type_text.dart';
 import 'package:flutter/material.dart';
 
