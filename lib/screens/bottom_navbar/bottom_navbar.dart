@@ -43,7 +43,6 @@ class _BottomNavbarScreenState extends State<BottomNavbarScreen> {
 
   final List<Widget> _pages = [
     HomePage(),
-    // ChatPage(),
     ChatScreen(),
     SavedPage(),
   ];
@@ -60,13 +59,14 @@ class _BottomNavbarScreenState extends State<BottomNavbarScreen> {
           decoration: isDarkTheme
               ? BoxDecoration(
                   gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.black,
-                        Color(0xff0D1B2A),
-                        Color(0xff1C2541)
-                      ]),
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black,
+                      Color(0xff0D1B2A),
+                      Color(0xff1C2541)
+                    ],
+                  ),
                 )
               : BoxDecoration(
                   color: Color(0xFFF2F5FA),

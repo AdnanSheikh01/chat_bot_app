@@ -345,8 +345,10 @@ class _ChatScreenState extends State<ChatScreen> {
                                                   isTextOnly:
                                                       hasImages ? false : true);
                                             },
-                                      icon: Icon(Icons.rocket_outlined,
-                                          color: Colors.white),
+                                      icon: Icon(
+                                        Icons.rocket_outlined,
+                                        color: Colors.white,
+                                      ),
                                     ),
                                   ),
                           ],

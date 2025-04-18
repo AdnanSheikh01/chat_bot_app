@@ -3,6 +3,8 @@ import 'package:chat_bot_app/hive/chat_history.dart';
 import 'package:chat_bot_app/providers/chat_provider.dart';
 import 'package:chat_bot_app/widgets/auto_type_text.dart';
 import 'package:flutter/material.dart';
+import 'package:focused_menu/focused_menu.dart';
+import 'package:focused_menu/modals.dart';
 
 import 'package:get/get.dart';
 import 'package:markdown/markdown.dart' as md;
@@ -71,81 +73,69 @@ class _SavedPageState extends State<SavedPage> {
 
                               var plainText =
                                   markdownToPlainText(chat.response);
-                              return Card(
-                                margin: EdgeInsets.only(bottom: 15),
-                                shadowColor:
-                                    isDarkTheme ? Colors.blue : Colors.black,
-                                child: ListTile(
-                                  onLongPress: () {
-                                    showDialog(
-                                      context: context,
-                                      barrierDismissible: false,
-                                      builder: (context) => AlertDialog(
-                                        title: Text("Delete Chat"),
-                                        content: Text("Are you sure?"),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () {
-                                              Navigator.pop(context);
-                                            },
-                                            child: Text(
-                                              "Cancel",
-                                              style: TextStyle(
-                                                  fontWeight: FontWeight.bold),
-                                            ),
-                                          ),
-                                          TextButton(
-                                            onPressed: () async {
-                                              await context
-                                                  .read<ChatProvider>()
-                                                  .deletChatMessage(
-                                                      chatID: chat.uid);
-                                              await chat.delete();
-                                              Get.back();
-                                              Get.snackbar("Success",
-                                                  "Chat Deleted Successfully",
-                                                  backgroundColor: Colors.green,
-                                                  colorText: Colors.white);
-                                            },
-                                            child: Text(
-                                              "Delete",
-                                              style: TextStyle(
-                                                  fontWeight: FontWeight.bold),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                  onTap: () async {
-                                    final chatprovider =
-                                        context.read<ChatProvider>();
-                                    await chatprovider.prepareChatRoom(
-                                        isNewChat: false, chatID: chat.uid);
+                              return FocusedMenuHolder(
+                                onPressed: () {},
+                                menuWidth: 150,
+                                menuItems: [
+                                  FocusedMenuItem(
+                                    title: Text(
+                                      "Delete",
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                    backgroundColor: Colors.red,
+                                    onPressed: () async {
+                                      await context
+                                          .read<ChatProvider>()
+                                          .deletChatMessage(chatID: chat.uid);
+                                      await chat.delete();
 
-                                    chatprovider.setCurrentIndex(newIndex: 1);
-                                    chatprovider.pageController.jumpToPage(1);
-                                  },
-                                  leading: CircleAvatar(
-                                    backgroundColor: chat.image.isNotEmpty
-                                        ? Colors.green
-                                        : Colors.blue,
-                                    child: Icon(
-                                        chat.image.isNotEmpty
-                                            ? Icons.image
-                                            : Icons.text_snippet_rounded,
-                                        color: Colors.white),
+                                      Get.snackbar("Success",
+                                          "Chat Deleted Successfully",
+                                          backgroundColor: Colors.green,
+                                          colorText: Colors.white);
+                                    },
+                                    trailingIcon: Icon(
+                                      Icons.delete_forever,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                ],
+                                child: Card(
+                                  margin: EdgeInsets.only(bottom: 15),
+                                  shadowColor:
+                                      isDarkTheme ? Colors.blue : Colors.black,
+                                  child: ListTile(
+                                    onTap: () async {
+                                      final chatprovider =
+                                          context.read<ChatProvider>();
+                                      await chatprovider.prepareChatRoom(
+                                          isNewChat: false, chatID: chat.uid);
+
+                                      chatprovider.setCurrentIndex(newIndex: 1);
+                                      chatprovider.pageController.jumpToPage(1);
+                                    },
+                                    leading: CircleAvatar(
+                                      backgroundColor: chat.image.isNotEmpty
+                                          ? Colors.green
+                                          : Colors.blue,
+                                      child: Icon(
+                                          chat.image.isNotEmpty
+                                              ? Icons.image
+                                              : Icons.text_snippet_rounded,
+                                          color: Colors.white),
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(10)),
+                                    title: Text(chat.name),
+                                    subtitle: Text(
+                                      plainText,
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 2,
+                                    ),
+                                    trailing:
+                                        Icon(Icons.arrow_forward_ios_rounded),
                                   ),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10)),
-                                  title: Text(chat.name),
-                                  subtitle: Text(
-                                    plainText,
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 2,
-                                  ),
-                                  trailing:
-                                      Icon(Icons.arrow_forward_ios_rounded),
                                 ),
                               );
                             },
